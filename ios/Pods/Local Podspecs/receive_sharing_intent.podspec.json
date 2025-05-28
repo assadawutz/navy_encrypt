@@ -1,0 +1,24 @@
+{
+  "name": "receive_sharing_intent",
+  "version": "1.6.8",
+  "summary": "A flutter plugin that enables flutter apps to receive sharing photos from other apps.",
+  "description": "A flutter plugin that enables flutter apps to receive sharing photos from other apps.",
+  "homepage": "https://kasem.dev",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Kasem": "kasem.jaffer@gmail.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": "Classes/**/*",
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": []
+  },
+  "platforms": {
+    "ios": "12.0"
+  }
+}

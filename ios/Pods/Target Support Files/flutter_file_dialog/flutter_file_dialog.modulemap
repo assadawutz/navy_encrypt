@@ -1,0 +1,6 @@
+framework module flutter_file_dialog {
+  umbrella header "flutter_file_dialog-umbrella.h"
+
+  export *
+  module * { export * }
+}

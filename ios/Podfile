@@ -5,7 +5,7 @@ platform :ios, '17.6'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug' => :debug,
+  'Debug' => :release,
   'Profile' => :release,
   'Release' => :release,
 }
@@ -35,7 +35,6 @@ target 'Runner' do
 end
 
 post_install do |installer|
-  # Set deployment target for all targets
   installer.generated_projects.each do |project|
     project.targets.each do |target|
       target.build_configurations.each do |config|
