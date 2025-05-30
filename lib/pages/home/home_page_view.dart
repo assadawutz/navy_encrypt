@@ -94,7 +94,7 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
               if (snapshot.hasData) {
                 var packageInfo = snapshot.data;
                 return Text(
-                  'เวอร์ชัน 3.0.1+1',
+                  'เวอร์ชัน 3.0.1+4',
                   style: TextStyle(fontSize: 18.0),
                 );
               }

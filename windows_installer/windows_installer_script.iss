@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "รับส่งไฟล์"
-#define MyAppVersion "3.0.1+1"
+#define MyAppVersion "3.0.1+4"
 #define MyAppPublisher "กรมการสื่อสารและเทคโนโลยีสารสนเทศทหารเรือ"
 #define MyAppURL "http://www.ncit.navy.mi.th/index.php/main/index"
 #define MyAppExeName "navy_encrypt.exe"
@@ -28,7 +28,7 @@ DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 OutputBaseFilename=navec_setup
-SetupIconFile=C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\windows_installer\setup_icon.ico
+SetupIconFile=C:\Users\2fellows\Desktop\navy_encrypt\windows_installer\setup_icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -40,16 +40,16 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\desktop_window_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\file_selector_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\vcruntime140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Admin\Projects\2fellows\navy-encrypt\app\navy_encrypt\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\desktop_window_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\file_selector_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\pdfium.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\permission_handler_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\printing_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\window_size_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\2fellows\Desktop\navy_encrypt\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
