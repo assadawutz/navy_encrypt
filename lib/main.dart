@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:io' show Platform;
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:navy_encrypt/etc/constants.dart';
@@ -37,10 +38,10 @@ class MyHttpOverrides extends HttpOverrides {
 
 Future<void> main(List<String> arguments) async {
   // get command-line arg in desktop app
-  // if (Platform.isAndroid == true || Platform.isIOS == true) {
-  //   WidgetsFlutterBinding.ensureInitialized();
-  //   await Firebase.initializeApp();
-  // }
+  if (Platform.isAndroid == true || Platform.isIOS == true) {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+  }
 
 // Ideal time to initialize
 //   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -81,7 +82,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    _filePath = filePathFromCli; // กรณี Windows app
+    _filePath = filePathFromCli;
 
     _shareIntentHandler = ShareIntentHandler(
       onReceiveIntent: (filePath, isAppOpen) {

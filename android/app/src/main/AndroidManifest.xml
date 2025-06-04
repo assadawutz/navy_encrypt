@@ -4,6 +4,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        
         android:label="รับส่งไฟล์">
         <activity
             android:name=".MainActivity"

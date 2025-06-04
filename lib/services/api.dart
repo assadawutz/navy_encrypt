@@ -132,6 +132,8 @@ class MyApi {
     params['email'] = email;
     params['uuid'] = uuid;
     try {
+      print(
+          "END_POINT_REGISTER_WATERMARK > ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
       return await _fetch(END_POINT_WATERMARK_CHECKDECRYPT, params);
     } catch (e) {
       print(e);

@@ -17,6 +17,23 @@
             </InsightsFilterSettings>
           </value>
         </entry>
+        <entry key="Firebase Crashlytics">
+          <value>
+            <InsightsFilterSettings>
+              <option name="connection">
+                <ConnectionSetting>
+                  <option name="appId" value="th.mi.navy.navy_encrypt" />
+                  <option name="mobileSdkAppId" value="1:406078252099:android:d42fdf5fb93dd5e62ba0f6" />
+                  <option name="projectId" value="eminent-cycle-87602" />
+                  <option name="projectNumber" value="406078252099" />
+                </ConnectionSetting>
+              </option>
+              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="timeIntervalDays" value="THIRTY_DAYS" />
+              <option name="visibilityType" value="ALL" />
+            </InsightsFilterSettings>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
