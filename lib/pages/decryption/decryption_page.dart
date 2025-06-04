@@ -119,8 +119,9 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
 
     if (outFile != null && uuid != null) {
       try {
-        final statusCheckDecrypt = await MyApi().getCheckDecrypt(email, uuid);
-        if (!statusCheckDecrypt) {
+        final statusCheckDecrypt = await MyApi().getCheckDecrypt2(email, uuid);
+        print("statusCheckDecrypt = $statusCheckDecrypt");
+        if (statusCheckDecrypt == null) {
           showDialog(
               context: context,
               builder: (context) {

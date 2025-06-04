@@ -140,6 +140,20 @@ class MyApi {
     }
   }
 
+  Future<bool> getCheckDecrypt2(String email, String uuid) async {
+    Map<String, dynamic> params = {};
+    params['email'] = email;
+    params['uuid'] = uuid;
+    try {
+      print("getCheckDecrypt ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
+      return await _fetch2(
+          END_POINT_WATERMARK_CHECKDECRYPT, "email=$email&uuid=$uuid");
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
   Future<List<Log>> getLog(String email) async {
     Map<String, dynamic> params = {};
     params['email'] = email;
@@ -188,11 +202,9 @@ Future<dynamic> _submit(String endPoint, Map<String, dynamic> params) async {
 
     var result = ApiResult.fromJson(jsonBody);
 
-    if (result.status != null && result.data != false) {
+    if (result.status == 'ok') {
       return result.data; // ถ้า data มีค่าอื่นๆ ก็จะ return ค่านั้น
       // return 1;
-    } else if (result.status == 'ok' && result.data == false) {
-      return 0; // สำหรับกรณีที่ไม่ใช่ ok แต่ต้องการให้ return เป็น int
     } else {
       throw result.message;
     }
@@ -204,6 +216,29 @@ Future<dynamic> _submit(String endPoint, Map<String, dynamic> params) async {
 Future<dynamic> _fetch(
     String endPoint, Map<String, dynamic> queryParams) async {
   String queryString = Uri(queryParameters: queryParams).query;
+  var url = Uri.parse('${Constants.API_BASE_URL}/$endPoint?$queryString');
+  final response = await http.get(url);
+  print('${Constants.API_BASE_URL}/$endPoint?$queryString: $response');
+  print("response.statusCode ${response.statusCode}");
+  print("response.body ${response.body}");
+  if (response.statusCode == 200) {
+    Map<String, dynamic> jsonBody = json.decode(response.body);
+    print('RESPONSE BODY: $jsonBody');
+
+    var result = ApiResult.fromJson(jsonBody);
+
+    if (result.status == 'ok') {
+      return result.data;
+    } else {
+      throw result.message;
+    }
+  } else {
+    throw response.body;
+  }
+}
+
+Future<dynamic> _fetch2(String endPoint, String queryParams) async {
+  String queryString = queryParams.toString();
   var url = Uri.parse('${Constants.API_BASE_URL}/$endPoint?$queryString');
   final response = await http.get(url);
   print('${Constants.API_BASE_URL}/$endPoint?$queryString: $response');
