@@ -176,14 +176,14 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
 
       try {
         String fileName = '${p.basename(_toBeDecryptedFilePath)}';
-        String type = 'decryption';
+        String type = 'encryption'; // or 'decryption' based on your logic
         // List<int> shareUserId = [];
         // List<User> _shareSelected;
         //
         // _shareSelected.forEach((User user) => shareUserId.add(user.id));
 
-        final logId = await MyApi().saveLog(
-            email, fileName, uuid, null, 'view', "encryption", secret, null);
+        final logId = await MyApi()
+            .saveLog(email, fileName, uuid, null, 'view', type, secret, null);
 
         if (logId == null) {
           showOkDialog(

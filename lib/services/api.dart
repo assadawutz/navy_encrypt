@@ -132,6 +132,7 @@ class MyApi {
     params['email'] = email;
     params['uuid'] = uuid;
     try {
+      print("getCheckDecrypt ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
       return await _fetch(END_POINT_WATERMARK_CHECKDECRYPT, params);
     } catch (e) {
       print(e);
@@ -187,9 +188,11 @@ Future<dynamic> _submit(String endPoint, Map<String, dynamic> params) async {
 
     var result = ApiResult.fromJson(jsonBody);
 
-    if (result.status == 'ok') {
-      return result.data;
+    if (result.status != null && result.data != false) {
+      return result.data; // ถ้า data มีค่าอื่นๆ ก็จะ return ค่านั้น
       // return 1;
+    } else if (result.status == 'ok' && result.data == false) {
+      return 0; // สำหรับกรณีที่ไม่ใช่ ok แต่ต้องการให้ return เป็น int
     } else {
       throw result.message;
     }
