@@ -231,7 +231,7 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
 
     try {
       if (file != null) {
-        String fileName = '${p.basename(file.path)}';
+        String fileName = '${p.basename(file.path.split('/').last)}';
         String type = doEncrypt ? 'encryption' : 'watermark';
 
         final logId = await MyApi()

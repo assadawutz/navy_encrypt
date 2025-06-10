@@ -132,12 +132,6 @@ class MyApi {
     params['email'] = email;
     params['uuid'] = uuid;
     try {
-<<<<<<< HEAD
-      print(
-          "END_POINT_REGISTER_WATERMARK > ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
-=======
-      print("getCheckDecrypt ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
->>>>>>> 8ba16c4d73359dd31c77b3b1a8e0e3879c88ab8b
       return await _fetch(END_POINT_WATERMARK_CHECKDECRYPT, params);
     } catch (e) {
       print(e);
@@ -150,9 +144,7 @@ class MyApi {
     params['email'] = email;
     params['uuid'] = uuid;
     try {
-      print("getCheckDecrypt ${END_POINT_WATERMARK_CHECKDECRYPT} ${params}");
-      return await _fetch2(
-          END_POINT_WATERMARK_CHECKDECRYPT, "email=$email&uuid=$uuid");
+      return await _fetch2(END_POINT_WATERMARK_CHECKDECRYPT, params);
     } catch (e) {
       print(e);
       throw e;
@@ -242,8 +234,9 @@ Future<dynamic> _fetch(
   }
 }
 
-Future<dynamic> _fetch2(String endPoint, String queryParams) async {
-  String queryString = queryParams.toString();
+Future<dynamic> _fetch2(
+    String endPoint, Map<String, dynamic> queryParams) async {
+  String queryString = Uri(queryParameters: queryParams).query;
   var url = Uri.parse('${Constants.API_BASE_URL}/$endPoint?$queryString');
   final response = await http.get(url);
   print('${Constants.API_BASE_URL}/$endPoint?$queryString: $response');
@@ -257,9 +250,13 @@ Future<dynamic> _fetch2(String endPoint, String queryParams) async {
 
     if (result.status == 'ok') {
       return result.data;
+    } else if (result.status == 'ok' && result.message == "สำเร็จ") {
+      return result;
     } else {
       throw result.message;
     }
+  } else if (response.statusCode == 304) {
+    return false;
   } else {
     throw response.body;
   }

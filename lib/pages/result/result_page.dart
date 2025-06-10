@@ -320,7 +320,7 @@ class _ResultPageController extends MyState<ResultPage> {
       CloudPickerPage.routeName,
       arguments: CloudPickerPageArg(
           cloudDrive: localDrive..fileToUpload = File(_filePath),
-          title: 'โฟลเดอรs์ของแอป',
+          title: 'โฟลเดอร์ของแอป',
           headerImagePath: 'assets/images/ic_document.png',
           rootName: 'App\'s Folder'),
       //arguments: localDrive..fileToUpload = File(_filePath),
@@ -514,24 +514,24 @@ class _ResultPageController extends MyState<ResultPage> {
 
     if (!_saveStstus) {
       bool isSave = false;
-      await showAlertDialog(
-        context,
-        'แจ้งเตือน',
-        textContent: 'คุณต้องการบันทึกก่อนหรือไม่ ?',
-        content: null,
-        dismissible: false,
-        buttonList: [
-          DialogActionButton(label: 'ไม่ใช่', onClick: null),
-          DialogActionButton(
-              label: 'ใช่',
-              onClick: () async {
-                isSave = true;
-              }),
-        ],
-      );
-      if (isSave) {
-        return _handleClickSaveButton();
-      }
+      // await showAlertDialog(
+      //   context,
+      //   'แจ้งเตือน',
+      //   textContent: 'คุณต้องการบันทึกก่อนหรือไม่ ?',
+      //   content: null,
+      //   dismissible: false,
+      //   buttonList: [
+      //     DialogActionButton(label: 'ไม่ใช่', onClick: null),
+      //     DialogActionButton(
+      //         label: 'ใช่',
+      //         onClick: () async {
+      //           isSave = true;
+      //         }),
+      //   ],
+      // );
+      // if (isSave) {
+      //   return _handleClickSaveButton();
+      // }
     }
     // END ยืนยันบันทึกข้อมูลก่อนอนุญาต
 
@@ -542,7 +542,7 @@ class _ResultPageController extends MyState<ResultPage> {
     isLoading = false;
 
     setState(() {
-      // _shareSelected = [];
+      _shareSelected = [];
     });
     // _shareLog
 

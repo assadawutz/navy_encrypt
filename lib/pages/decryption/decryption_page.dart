@@ -116,12 +116,12 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
     } on Exception catch (e) {
       showOkDialog(context, 'เกิดข้อผิดพลาดในการถอดรหัส: $e');
     }
+    String getLog;
 
     if (outFile != null && uuid != null) {
       try {
-        final statusCheckDecrypt = await MyApi().getCheckDecrypt2(email, uuid);
-        print("statusCheckDecrypt = $statusCheckDecrypt");
-        if (statusCheckDecrypt == null) {
+        final statusCheckDecrypt = await MyApi().getCheckDecrypt(email, uuid);
+        if (!statusCheckDecrypt) {
           showDialog(
               context: context,
               builder: (context) {
@@ -174,18 +174,13 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
       } on Exception catch (e) {
         showOkDialog(context, 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์!');
       }
+      String getLog;
 
       try {
         String fileName = '${p.basename(_toBeDecryptedFilePath)}';
-        String type = 'encryption'; // or 'decryption' based on your logic
-        // List<int> shareUserId = [];
-        // List<User> _shareSelected;
-        //
-        // _shareSelected.forEach((User user) => shareUserId.add(user.id));
-
-        final logId = await MyApi()
-            .saveLog(email, fileName, uuid, null, 'view', type, secret, null);
-
+        int logId = await MyApi().saveLog(
+            email, fileName, uuid, null, 'view', "encryption", secret, null);
+        getLog = logId.toString();
         if (logId == null) {
           showOkDialog(
             context,
@@ -212,6 +207,7 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
           'filePath': outFile.path,
           'message': 'ถอดรหัสสำเร็จ',
           'isEncryption': false,
+          'userID': getLog,
           'fileEncryptPath': _toBeDecryptedFilePath,
           'signatureCode': null,
           'type': 'encryption'

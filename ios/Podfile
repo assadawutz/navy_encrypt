@@ -1,11 +1,10 @@
 # Define a global platform for your project
-platform :ios, '17.6'
+platform :ios, '15.4'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
-  'Debug' => :release,
+  'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
@@ -37,7 +36,11 @@ post_install do |installer|
   installer.generated_projects.each do |project|
     project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.6'
+        config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+        config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+        config.build_settings['DEVELOPMENT_TEAM'] = 'BA93FUXZ6S'
+
+
       end
     end
   end

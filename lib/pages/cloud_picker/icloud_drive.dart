@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:icloud_storage/icloud_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:navy_encrypt/etc/file_util.dart';
 import 'package:navy_encrypt/models/cloud_file.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_drive.dart';
@@ -90,11 +89,11 @@ class ICloudDrive extends CloudDrive {
 
   Future<String> _getUploadFileFullPath(CloudFile folder) async {
     DateTime now = DateTime.now();
-    String formattedDate = DateFormat('yyyy-MM-dd–kk:mm:ss:ss-').format(now);
+    // String formattedDate = DateFormat('yyyy-MM-dd–kk:mm:ss:ss-').format(now);
     final dirPath =
         await '$_rootDirPath${folder.id == 'root' ? '' : folder.id}';
-    print("${formattedDate}${p.basename(_fileToUpload.path)}");
-    return '$dirPath/${formattedDate}${p.basename(_fileToUpload.path)}';
+    // print("${formattedDate}${p.basename(_fileToUpload.path)}");
+    return '$dirPath/file_${p.basename(_fileToUpload.path)}';
   }
 
   @override
