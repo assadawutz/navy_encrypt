@@ -47,7 +47,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName '3.0.1'
         multiDexEnabled true
-        versionNameSuffix '4'
+        versionNameSuffix '5'
     }
 
     buildTypes {
