@@ -1,6 +1,0 @@
-framework module icloud_storage {
-  umbrella header "icloud_storage-umbrella.h"
-
-  export *
-  module * { export * }
-}

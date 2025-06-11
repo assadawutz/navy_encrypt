@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>786699358980-qvot4vtonrfcvo9r5jrqhls9to62m3g2.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.786699358980-qvot4vtonrfcvo9r5jrqhls9to62m3g2</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>786699358980-894afpoc2p2gtdrm63ufhfsb6etv6ira.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC_kq3aCx_kEywShVY-TTPFYk1zcr9Dx4o</string>
+	<key>GCM_SENDER_ID</key>
+	<string>786699358980</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>th.mi.navy.navyEncrypt</string>
+	<key>PROJECT_ID</key>
+	<string>tv-live-5-force</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tv-live-5-force.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:786699358980:ios:768ffef828e99e36bf7651</string>
+	<key>DATABASE_URL</key>
+	<string>https://tv-live-5-force.firebaseio.com</string>
+</dict>
+</plist>
