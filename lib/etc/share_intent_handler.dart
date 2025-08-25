@@ -1,11 +1,11 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:navy_encrypt/etc/utils.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:path/path.dart' as p;
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class ShareIntentHandler {
   StreamSubscription _intentDataStreamSubscription;
@@ -60,7 +60,7 @@ class ShareIntentHandler {
     final logMap = {
       'INTENT TYPE': 'RECEIVE MEDIA STREAM',
     };
-    if (fileList != null && fileList.isNotEmpty) {
+    if (fileList.isNotEmpty) {
       var filePath = fileList[0].path; // only first file
       logMap['FILE COUNT'] = fileList.length.toString();
       logMap['1ST FILE PATH'] = filePath;
@@ -70,7 +70,7 @@ class ShareIntentHandler {
         logMap['ACTUAL FILE SYSTEM PATH'] = filePath;
       }
 
-      if (onReceiveIntent != null) onReceiveIntent(filePath, isAppOpen);
+      onReceiveIntent(filePath, isAppOpen);
     } else {
       logMap['FILE COUNT'] = 'fileList is null or empty!';
     }
@@ -89,12 +89,11 @@ class ShareIntentHandler {
     //_log(logMap);
     logWithBorder(logMap, 1);
 
-    if (onReceiveIntent != null && filePath != null)
-      onReceiveIntent(filePath, isAppOpen);
+    onReceiveIntent(filePath, isAppOpen);
   }
 
   Future<String> _getFilePathFromUrl(String url) async {
-    if (url == null || url.trim().isEmpty) return null;
+    if (url.trim().isEmpty) return null;
 
     /*var file = await _convertUriToFile(url);
     if (file == null) return null;*/
@@ -119,7 +118,7 @@ class ShareIntentHandler {
     return filePath;
   }
 
-  /*Future<File> _convertUriToFile(String url) async {
+/*Future<File> _convertUriToFile(String url) async {
     try {
       Uri uri = Uri.parse(url);
       return await toFile(uri);

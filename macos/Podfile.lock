@@ -185,30 +185,30 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_size/macos
 
 SPEC CHECKSUMS:
-  desktop_window: de6acd6053564bdccd9f4b9473d25bf4f2ad9bdf
-  device_info_plus_macos: e0007b2d6dd830e1d051d8ba26868260c6a060b4
-  file_selector_macos: ff34a82a18d211c6b3f2cf1cde944a81215f0964
+  desktop_window: fb7c4f12c1129f947ac482296b6f14059d57a3c3
+  device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
+  file_selector_macos: f1b08a781e66103e3ba279fd5d4024a2478b3af6
   Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
-  firebase_core: ddb34567f5dda4f7c0a52f8e785df900387d7127
+  firebase_core: a74ee8b3ab5f91ae6b73f4913eaca996c24458b6
   FirebaseAnalytics: 4d310b35c48eaa4a058ddc04bdca6bdb5dc0fe80
   FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
   FirebaseCoreInternal: df84dd300b561c27d5571684f389bf60b0a5c934
   FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
-  flutter_web_auth: 564cf47151b8dba1d8b91f3c25be3ca6c9946958
+  flutter_web_auth: 3373edbc799f621fda6c14510d4b5a829453c8ae
   FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
   FMDB: 728731dd336af3936ce00f91d9d8495f5718a0e6
   GoogleAppMeasurement: 70ce9aa438cff1cfb31ea3e660bcc67734cb716e
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
-  package_info_plus_macos: 0576060178fdaab87c4a9f5acb3a79c1f20d75c8
-  path_provider_foundation: 2a68637f8a62df7f6e790a428d1bdf72cb4e2d59
-  printing: 35c357aa8f3c514454e51ddd6decdb3b884401d7
+  package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  printing: e4b7e232ff3d5d50a70b20d959aa71035a5c31f9
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  share_plus_macos: bad864466cc8d3edc440a2dec8befc781bf002e4
-  shared_preferences_foundation: 4e65c567e7877037d328829a522222c938bf308c
-  sqflite: c73556b2499b92f0b6e6946abe4a4084510cdf90
-  url_launcher_macos: c83b920a14ed6c0ec4d6069c3ec3e19222607405
-  window_size: 4bd15034e6e3d0720fd77928a7c42e5492cfece9
+  share_plus_macos: 853ee48e7dce06b633998ca0735d482dd671ade4
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
+  sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
+  url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
+  window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
 PODFILE CHECKSUM: 10dade1c8985184d335b31ee1162f249d4840b18
 

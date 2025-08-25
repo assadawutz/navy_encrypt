@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:navy_encrypt/pages/decrypt_page.dart';
-import 'package:navy_encrypt/pages/encrypt_page.dart';
 // import 'package:navy_encrypt/pages/step_page.dart';
 import 'package:navy_encrypt/etc/constants.dart';
+import 'package:navy_encrypt/pages/decrypt_page.dart';
+import 'package:navy_encrypt/pages/encrypt_page.dart';
 import 'package:navy_encrypt/pages/test_encryption.dart';
 
 import 'settings_page.dart';
@@ -243,7 +243,7 @@ class MenuItem extends StatelessWidget {
             ),
         child: TextButton(
           onPressed: () {
-            if (onPress != null) onPress();
+            onPress();
           },
           style: TextButton.styleFrom(
             backgroundColor: backgroundColor,

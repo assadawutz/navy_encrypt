@@ -1,14 +1,12 @@
 library flutter_onedrive;
 
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:navy_encrypt/etc/utils.dart';
-import 'dart:convert' show jsonDecode;
 
 import 'token.dart';
 
@@ -47,7 +45,7 @@ class OneDriveApi {
 
   Future<bool> isConnected() async {
     final accessToken = await _tokenManager.getAccessToken();
-    return (accessToken?.isNotEmpty) ?? false;
+    return (accessToken.isNotEmpty) ?? false;
   }
 
   Future<bool> connect() async {
@@ -100,9 +98,6 @@ class OneDriveApi {
 
   Future<Map<String, dynamic>> list(String folderId) async {
     final accessToken = await _tokenManager.getAccessToken();
-    if (accessToken == null) {
-      return null;
-    }
 
     final path = folderId == 'root' ? folderId : 'items/$folderId';
     final url = Uri.parse("${apiEndpoint}me/drive/$path/children");
@@ -130,9 +125,6 @@ class OneDriveApi {
 
   Future<http.StreamedResponse> pull(String fileId) async {
     final accessToken = await _tokenManager.getAccessToken();
-    if (accessToken == null) {
-      return null;
-    }
 
     final url = Uri.parse("${apiEndpoint}me/drive/items/$fileId/content");
     final request = new http.Request(
@@ -176,10 +168,6 @@ class OneDriveApi {
     Function(double) loadProgress,
   ) async {
     final accessToken = await _tokenManager.getAccessToken();
-    if (accessToken == null) {
-      // No access token
-      return false;
-    }
 
     final path = folderId == 'root' ? folderId : 'items/$folderId';
 

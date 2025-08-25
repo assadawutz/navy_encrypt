@@ -42,8 +42,7 @@ class _DecryptionPageViewWin
                 ),
               if (state._registerStatus == WatermarkRegisterStatus.registered)
                 Column(children: [
-                  if (state._toBeDecryptedFilePath != null)
-                    FileDetails(filePath: state._toBeDecryptedFilePath),
+                  FileDetails(filePath: state._toBeDecryptedFilePath),
                   const SizedBox(height: 20.0),
                   _buildPasswordField(),
                   const SizedBox(height: 40.0),
@@ -63,11 +62,10 @@ class _DecryptionPageViewWin
                     width: 180.0,
                     onClick: state._handleClickGoButton,
                   ),
-                  if (state._decryptedBytes != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48.0),
-                      child: Image.memory(state._decryptedBytes),
-                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 48.0),
+                    child: Image.memory(state._decryptedBytes),
+                  ),
                 ])
             ],
           ),

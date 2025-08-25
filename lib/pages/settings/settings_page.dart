@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 // import 'package:flutter_icons/flutter_icons.dart';
 // import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:navy_encrypt/common/encrypt_decrypt_header.dart';
@@ -21,8 +22,6 @@ import 'package:navy_encrypt/etc/extensions.dart';
 import 'package:navy_encrypt/etc/file_util.dart';
 import 'package:navy_encrypt/etc/utils.dart';
 import 'package:navy_encrypt/navy_encryption/watermark.dart';
-import 'package:navy_encrypt/pages/home/home_page.dart';
-import 'package:navy_encrypt/pages/home_page.dart';
 import 'package:navy_encrypt/services/api.dart';
 import 'package:navy_encrypt/storage/prefs.dart';
 import 'package:open_file/open_file.dart';
@@ -88,7 +87,6 @@ class _SettingsPageController extends MyState<SettingsPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // อีเมล
                   SizedBox(height: 16.0),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.start,

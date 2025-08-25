@@ -9,11 +9,11 @@ import 'package:navy_encrypt/etc/constants.dart';
 import 'package:navy_encrypt/etc/file_util.dart';
 import 'package:navy_encrypt/etc/utils.dart';
 import 'package:navy_encrypt/models/cloud_file.dart';
+import 'package:navy_encrypt/pages/cloud_picker/auth/my_oauth.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_drive.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_picker_page.dart';
-import 'package:navy_encrypt/pages/cloud_picker/auth/my_oauth.dart';
-import 'package:path/path.dart' as p;
 import 'package:oauth2/oauth2.dart' as oauth2;
+import 'package:path/path.dart' as p;
 
 class GoogleDrive extends CloudDrive {
   static const authEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -64,12 +64,10 @@ class GoogleDrive extends CloudDrive {
   @override
   Future<bool> signIn() async {
     GoogleSignInAccount account = await _googleSignIn.signIn();
-    if (account != null) {
-      final authHeaders = await account.authHeaders; // token อยู่ใน authHeaders
-      final authenticateClient = GoogleAuthClient(authHeaders);
-      _driveApi = drive.DriveApi(authenticateClient);
-      return true;
-    }
+    final authHeaders = await account.authHeaders; // token อยู่ใน authHeaders
+    final authenticateClient = GoogleAuthClient(authHeaders);
+    _driveApi = drive.DriveApi(authenticateClient);
+    return true;
     return false;
   }
 
@@ -84,10 +82,8 @@ class GoogleDrive extends CloudDrive {
       scope: scope,
     ).connect();
 
-    if (client != null) {
-      _driveApi = drive.DriveApi(client);
-      return true;
-    }
+    _driveApi = drive.DriveApi(client);
+    return true;
     return false;
   }
 

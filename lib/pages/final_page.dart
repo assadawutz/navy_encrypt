@@ -50,71 +50,74 @@ class _FinalPageState extends State<FinalPage> {
                   ),
                   SizedBox(height: 30.0),
                   if (this.widget.type == 0)
-                  Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: Theme.of(context).primaryColor,
-                          //onSurface: Colors.grey,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  'บันทึก',
-                                  style: GoogleFonts.prompt(fontSize: 16.0),
+                    Column(
+                      children: [
+                        TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            //onSurface: Colors.grey,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'บันทึก',
+                                    style: GoogleFonts.prompt(fontSize: 16.0),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 12.0),
-                              Icon(Icons.save),
-                            ],
+                                SizedBox(width: 12.0),
+                                Icon(Icons.save),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 16.0),
-                      TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(
-                          primary: Colors.white,
-                          backgroundColor: Theme.of(context).primaryColor,
-                          //onSurface: Colors.grey,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  'แชร์',
-                                  style: GoogleFonts.prompt(fontSize: 16.0),
+                        SizedBox(height: 16.0),
+                        TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).primaryColor,
+                            //onSurface: Colors.grey,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    'แชร์',
+                                    style: GoogleFonts.prompt(fontSize: 16.0),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 12.0),
-                              Icon(Icons.share),
-                            ],
+                                SizedBox(width: 12.0),
+                                Icon(Icons.share),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   if (this.widget.type == 1)
                     Column(
                       children: [
                         TextButton(
                           onPressed: () {},
                           style: TextButton.styleFrom(
-                            primary: Colors.white,
+                            foregroundColor: Colors.white,
                             backgroundColor: Theme.of(context).primaryColor,
                             //onSurface: Colors.grey,
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 10.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -134,12 +137,13 @@ class _FinalPageState extends State<FinalPage> {
                         TextButton(
                           onPressed: () {},
                           style: TextButton.styleFrom(
-                            primary: Colors.white,
+                            foregroundColor: Colors.white,
                             backgroundColor: Theme.of(context).primaryColor,
                             //onSurface: Colors.grey,
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 4.0, horizontal: 10.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -185,7 +189,8 @@ class _FinalPageState extends State<FinalPage> {
                         children: [
                           Icon(Icons.chevron_left),
                           SizedBox(width: 8.0),
-                          Text('ย้อนกลับ', style: GoogleFonts.prompt(fontSize: 18.0)),
+                          Text('ย้อนกลับ',
+                              style: GoogleFonts.prompt(fontSize: 18.0)),
                         ],
                       ),
                     ),

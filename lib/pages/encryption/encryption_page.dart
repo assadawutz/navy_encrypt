@@ -67,7 +67,7 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
   @override
   Widget build(BuildContext context) {
     var filePath = ModalRoute.of(context).settings.arguments as String;
-    if (filePath != null) _toBeEncryptedFilePath = filePath;
+    _toBeEncryptedFilePath = filePath;
 
     print('PATH OF FILE TO BE ENCRYPTED: $_toBeEncryptedFilePath');
 
@@ -160,12 +160,6 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
 
       signatureCode = _watermarkEditingController.text;
       print("signatureCode1 = ${signatureCode}");
-
-      if (signatureCode == null) {
-        isLoading = false;
-        showOkDialog(context, "ไม่สามารถดำเนินการได้!");
-        return;
-      }
       print("signatureCode2 = ${signatureCode}");
       // ใส่ลายน้ำ
       file = await Navec.addWatermark(
@@ -175,11 +169,6 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
         email: email ?? "",
         signatureCode: signatureCode,
       );
-
-      if (file == null) {
-        isLoading = false;
-        return;
-      }
     }
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     print("prefs.getString('action'); ${prefs.getString('ref_code')}");
@@ -192,16 +181,6 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
       var refCode = await MyPrefs.getRefCode();
       uuid = await MyApi().getUuid(refCode);
       print("uuid = ${uuid}");
-      if (uuid == null) {
-        showOkDialog(
-          context,
-          'ผิดพลาด',
-          textContent:
-              'เกิดข้อผิดพลาดในการเข้ารหัส\nหรือบัญชีของท่านรอการยืนยัน!',
-        );
-        isLoading = false;
-        return;
-      }
 
       //loadingMessage = 'กำลังเข้ารหัส';
       Provider.of<LoadingMessage>(context, listen: false)
@@ -230,25 +209,13 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
     }
 
     try {
-      if (file != null) {
-        String fileName = '${p.basename(file.path.split('/').last)}';
-        String type = doEncrypt ? 'encryption' : 'watermark';
+      String fileName = '${p.basename(file.path.split('/').last)}';
+      String type = doEncrypt ? 'encryption' : 'watermark';
 
-        final logId = await MyApi()
-            .saveLog(email, fileName, uuid, signatureCode, 'create', type,
-                secret, null)
-            .toString();
-        if (logId == null) {
-          showOkDialog(
-            context,
-            'ผิดพลาด',
-            textContent: 'ไม่สามารถดำเนินการ\nหรือบัญชีของท่านรอการยืนยัน!',
-          );
-
-          isLoading = false;
-          return;
-        }
-      }
+      final logId = await MyApi()
+          .saveLog(email, fileName, uuid, signatureCode, 'create', type, secret,
+              null)
+          .toString();
     } catch (e) {
       showOkDialog(context, e.toString());
       isLoading = false;

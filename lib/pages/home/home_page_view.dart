@@ -12,7 +12,7 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
       showBackButton: false,
       showProgress: state.isLoading,
       header: Column(
-        // mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset('assets/images/ic_launcher.png', height: 70.0),
@@ -26,7 +26,7 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: DimensionUtil.isTallScreen(context) ? 34.0 : 28.0,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                         offset: Offset(2.0, 2.0),
                         blurRadius: 4.0,
@@ -58,41 +58,27 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
       ),
       headerAssetPath: _getHeaderImageAsset(context),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.06,
-                vertical: height * 0.02,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < state._menuData.length; i += 2)
-                    Expanded(
-                      child: Row(
-                        children: [
-                          for (var j = i; j < i + 2; j++)
-                            MenuItem(
-                              text: state._menuData[j]['text'],
-                              image: state._menuData[j]['image'],
-                              onClick: () {
-                                state._menuData[j]['onClick'](context);
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+          for (var i = 0; i < state._menuData.length; i += 2)
+            Row(
+              children: [
+                for (var j = i; j < i + 2 && j < state._menuData.length; j++)
+                  MenuItem(
+                    text: state._menuData[j]['text'],
+                    image: state._menuData[j]['image'],
+                    onClick: () {
+                      state._menuData[j]['onClick'](context);
+                    },
+                  ),
+              ],
             ),
-          ),
+          SizedBox(height: 20), // เผื่อ space ด้านล่าง
           FutureBuilder(
             future: state._getPackageInfo(),
             builder:
                 (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
               if (snapshot.hasData) {
-                var packageInfo = snapshot.data;
                 return Text(
                   'เวอร์ชัน 3.0.1+4',
                   style: TextStyle(fontSize: 18.0),
@@ -134,46 +120,50 @@ class MenuItem extends StatelessWidget {
         onTap: onClick,
         highlightColor: Colors.lightBlueAccent.withOpacity(0.05),
         splashColor: Colors.lightBlueAccent.withOpacity(0.1),
-        child: Container(
-          //color: Colors.yellow,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: size ??
-                    (screenHeight(context) > 800 || Platform.isWindows
-                        ? 90.0
-                        : 80.0),
-                height: size ??
-                    (screenHeight(context) > 800 || Platform.isWindows
-                        ? 90.0
-                        : 80.0),
-                decoration: BoxDecoration(
-                  color: Color(0xFFEFEFEF),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      width: borderWidth ?? 4.0, color: Color(0xFF3EC2FF)),
-                ),
-                child: Center(
-                    child: Image.asset(image,
-                        width: size != null
-                            ? size / 2
-                            : (screenHeight(context) > 800 || Platform.isWindows
-                                ? 42.5
-                                : 40.0))),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: size ??
+                  (screenHeight(context) > 800 ||
+                          Platform.isWindows ||
+                          Platform.isMacOS
+                      ? 100.0
+                      : 80.0),
+              height: size ??
+                  (screenHeight(context) > 800 ||
+                          Platform.isWindows ||
+                          Platform.isMacOS
+                      ? 100.0
+                      : 80.0),
+              decoration: BoxDecoration(
+                color: Color(0xFFEFEFEF),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    width: borderWidth ?? 4.0, color: Color(0xFF3EC2FF)),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 6.0),
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: Platform.isWindows ? 22.0 : 22.0,
-                    fontWeight: FontWeight.w500,
-                  ),
+              child: Center(
+                  child: Image.asset(image,
+                      width: size != null
+                          ? size / 2
+                          : (screenHeight(context) > 800 ||
+                                  Platform.isWindows ||
+                                  Platform.isMacOS
+                              ? 42.5
+                              : 40.0))),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize:
+                      Platform.isWindows || Platform.isMacOS ? 24.0 : 22.0,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

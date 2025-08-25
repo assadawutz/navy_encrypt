@@ -52,7 +52,7 @@ class SignInButtonBuilder extends StatelessWidget {
   final double width;
 
   /// The constructor is self-explanatory.
-  SignInButtonBuilder({
+  const SignInButtonBuilder({
     Key key,
     @required this.backgroundColor,
     @required this.onPressed,
@@ -110,7 +110,7 @@ class SignInButtonBuilder extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: innerPadding ??
-                  EdgeInsets.symmetric(
+                  const EdgeInsets.symmetric(
                     horizontal: 13,
                   ),
               child: _getIconOrImage(),
@@ -120,7 +120,7 @@ class SignInButtonBuilder extends StatelessWidget {
               style: TextStyle(
                 color: textColor,
                 fontSize: fontSize,
-                backgroundColor: Color.fromRGBO(0, 0, 0, 0),
+                backgroundColor: const Color.fromRGBO(0, 0, 0, 0),
               ),
             ),
           ],
@@ -131,9 +131,7 @@ class SignInButtonBuilder extends StatelessWidget {
 
   /// Get the icon or image widget
   Widget _getIconOrImage() {
-    if (image != null) {
-      return image;
-    }
+    return image;
     return Icon(
       icon,
       size: 20,

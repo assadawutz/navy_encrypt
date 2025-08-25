@@ -21,11 +21,7 @@ class _FileViewerPageView
   }
 
   Widget _getContentView() {
-    if (state._filePathList == null) {
-      return PhotoView(
-        imageProvider: FileImage(File(state._filePath)),
-      );
-    } else if (Platform.isWindows) {
+    if (Platform.isWindows) {
       return PhotoViewGalleryWindows(filePathList: state._filePathList);
     } else {
       return PhotoViewGallery.builder(
@@ -51,8 +47,8 @@ class _FileViewerPageView
           ),
         ),
         /*backgroundDecoration: widget.backgroundDecoration,
-                    pageController: widget.pageController,
-                    onPageChanged: onPageChanged,*/
+                  pageController: widget.pageController,
+                  onPageChanged: onPageChanged,*/
       );
     }
   }
@@ -131,8 +127,7 @@ class _PhotoViewGalleryWindowsState extends State<PhotoViewGalleryWindows> {
                     },
                     child: Column(
                       children: [
-                        if (index == 0)
-                          SizedBox(height: 8.0),
+                        if (index == 0) SizedBox(height: 8.0),
                         Container(
                           width: PhotoViewGalleryWindows.thumbnailSize,
                           height: PhotoViewGalleryWindows.thumbnailSize,

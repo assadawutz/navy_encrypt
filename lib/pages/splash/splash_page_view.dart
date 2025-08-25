@@ -9,7 +9,7 @@ class _SplashPageView extends WidgetView<SplashPage, SplashPageController> {
     //print('>>>>>> sharedFileList: ${this.widget.sharedFileList}');
 
     return BackgroundScaffold(
-      backgroundAssetPath: Platform.isWindows
+      backgroundAssetPath: Platform.isWindows || Platform.isMacOS
           ? 'assets/images/win/bg_splash_land.jpg'
           : 'assets/images/bg_splash.jpg',
       child: GestureDetector(
@@ -43,7 +43,7 @@ class _SplashPageView extends WidgetView<SplashPage, SplashPageController> {
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  if (Platform.isWindows)
+                  if (Platform.isWindows || Platform.isMacOS)
                     Expanded(
                       child: Center(
                         child: Padding(

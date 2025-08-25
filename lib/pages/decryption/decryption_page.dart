@@ -58,7 +58,7 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
   @override
   Widget build(BuildContext context) {
     var filePath = ModalRoute.of(context).settings.arguments as String;
-    if (filePath != null) _toBeDecryptedFilePath = filePath;
+    _toBeDecryptedFilePath = filePath;
 
     print('PATH OF FILE TO BE DECRYPTED: $_toBeDecryptedFilePath');
 
@@ -118,101 +118,85 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
     }
     String getLog;
 
-    if (outFile != null && uuid != null) {
-      try {
-        final statusCheckDecrypt = await MyApi().getCheckDecrypt(email, uuid);
-        if (!statusCheckDecrypt) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return StatefulBuilder(builder: (context, setState) {
-                  return MyDialog(
-                    headerImage: Image.asset(
-                        'assets/images/ic_unauthorized.png',
-                        width: Constants.LIST_DIALOG_HEADER_IMAGE_SIZE),
-                    body: Padding(
-                        padding: const EdgeInsets.all(0),
-                        child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              SizedBox(height: 32.0),
-                              Text(
-                                'คุณไม่มีสิทธิ์ในการเข้าถึงไฟล์นี้!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              SizedBox(height: 22.0),
-                              OverflowBar(
-                                alignment: MainAxisAlignment.end,
-                                // spacing: spacing,
-                                overflowAlignment: OverflowBarAlignment.end,
-                                overflowDirection: VerticalDirection.down,
-                                overflowSpacing: 0,
-                                children: <Widget>[
-                                  TextButton(
-                                    child: Text("ตกลง",
-                                        style: TextStyle(
-                                            color: Color.fromARGB(
-                                                255, 31, 150, 205))),
-                                    onPressed: () {
-                                      Navigator.pop(context, false);
-                                    },
-                                  ),
-                                ],
-                              )
-                            ])),
-                  );
-                });
+    try {
+      final statusCheckDecrypt = await MyApi().getCheckDecrypt(email, uuid);
+      if (!statusCheckDecrypt) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(builder: (context, setState) {
+                return MyDialog(
+                  headerImage: Image.asset('assets/images/ic_unauthorized.png',
+                      width: Constants.LIST_DIALOG_HEADER_IMAGE_SIZE),
+                  body: Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(height: 32.0),
+                            Text(
+                              'คุณไม่มีสิทธิ์ในการเข้าถึงไฟล์นี้!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 22.0, fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(height: 22.0),
+                            OverflowBar(
+                              alignment: MainAxisAlignment.end,
+                              // spacing: spacing,
+                              overflowAlignment: OverflowBarAlignment.end,
+                              overflowDirection: VerticalDirection.down,
+                              overflowSpacing: 0,
+                              children: <Widget>[
+                                TextButton(
+                                  child: Text("ตกลง",
+                                      style: TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 31, 150, 205))),
+                                  onPressed: () {
+                                    Navigator.pop(context, false);
+                                  },
+                                ),
+                              ],
+                            )
+                          ])),
+                );
               });
+            });
 
-          isLoading = false;
-          return;
-        }
-      } on Exception catch (e) {
-        showOkDialog(context, 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์!');
-      }
-      String getLog;
-
-      try {
-        String fileName = '${p.basename(_toBeDecryptedFilePath)}';
-        int logId = await MyApi().saveLog(
-            email, fileName, uuid, null, 'view', "encryption", secret, null);
-        getLog = logId.toString();
-        if (logId == null) {
-          showOkDialog(
-            context,
-            'ผิดพลาด',
-            textContent: 'ไม่สามารถดำเนินการ\nหรือบัญชีของท่านรอการตรวจสอบ!',
-          );
-          isLoading = false;
-          return;
-        }
-      } catch (e) {
-        showOkDialog(context, e.toString());
         isLoading = false;
         return;
       }
+    } on Exception {
+      showOkDialog(context, 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์!');
+    }
+
+    try {
+      String fileName = '${p.basename(_toBeDecryptedFilePath)}';
+      int logId = await MyApi().saveLog(
+          email, fileName, uuid, null, 'view', "encryption", secret, null);
+      getLog = logId.toString();
+    } catch (e) {
+      showOkDialog(context, e.toString());
+      isLoading = false;
+      return;
     }
 
     isLoading = false;
 
-    if (outFile != null) {
-      Navigator.pushReplacementNamed(
-        context,
-        ResultPage.routeName,
-        arguments: {
-          'filePath': outFile.path,
-          'message': 'ถอดรหัสสำเร็จ',
-          'isEncryption': false,
-          'userID': getLog,
-          'fileEncryptPath': _toBeDecryptedFilePath,
-          'signatureCode': null,
-          'type': 'encryption'
-        },
-      );
-    }
+    Navigator.pushReplacementNamed(
+      context,
+      ResultPage.routeName,
+      arguments: {
+        'filePath': outFile.path,
+        'message': 'ถอดรหัสสำเร็จ',
+        'isEncryption': false,
+        'userID': getLog,
+        'fileEncryptPath': _toBeDecryptedFilePath,
+        'signatureCode': null,
+        'type': 'encryption'
+      },
+    );
   }
 }

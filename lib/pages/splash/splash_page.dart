@@ -11,9 +11,6 @@ import 'package:navy_encrypt/common/my_button.dart';
 import 'package:navy_encrypt/common/my_state.dart';
 import 'package:navy_encrypt/common/widget_view.dart';
 import 'package:navy_encrypt/etc/utils.dart';
-import 'package:navy_encrypt/main.dart';
-import 'package:navy_encrypt/pages/decryption/decryption_page.dart';
-import 'package:navy_encrypt/pages/encryption/encryption_page.dart';
 import 'package:navy_encrypt/pages/home/home_page.dart';
 
 part 'splash_page_view.dart';
@@ -36,7 +33,9 @@ class SplashPageController extends MyState<SplashPage> {
     print('>>> SplashPageController initState()');
 
     try {
-      if (Platform.isWindows) DesktopWindow.setFullScreen(true);
+      if (Platform.isWindows || Platform.isMacOS) {
+        DesktopWindow.setFullScreen(true);
+      }
     } catch (e) {
       print(e);
     }
@@ -51,7 +50,7 @@ class SplashPageController extends MyState<SplashPage> {
 
     return;*/
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isMacOS) {
       //showOkDialog(context, filePathFromCli ?? 'NULL');
     } else {
       _timer = Timer(Duration(seconds: 3), () {

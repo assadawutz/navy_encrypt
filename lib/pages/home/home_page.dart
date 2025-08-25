@@ -5,7 +5,6 @@ import 'dart:io' show Directory, File, FileSystemEntity, Platform;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -67,10 +66,8 @@ class HomePageController extends MyState<HomePage> {
     // Future.delayed(
     //     Duration.zero, () => print('SCREEN RATIO: ${screenRatio(context)}'));
 
-    if (filePath != null) {
-      handleIntent(filePath);
-      filePath = null;
-    }
+    handleIntent(filePath);
+    filePath = null;
 
     // เปิดหน้า ตั้งค่าเมื่อเปิดใช้งานครั้งแรก
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -113,10 +110,12 @@ class HomePageController extends MyState<HomePage> {
     _menuData = [
       {
         'image': 'assets/images/ic_document.png',
-        'text': Platform.isWindows ? 'ไฟล์ในเครื่อง' : 'ไฟล์ในเครื่อง',
+        'text': Platform.isWindows || Platform.isMacOS
+            ? 'ไฟล์ในเครื่อง'
+            : 'ไฟล์ในเครื่อง',
         'onClick': _pickFromFileSystem,
       },
-      if (!Platform.isWindows)
+      if (!Platform.isWindows || Platform.isMacOS)
         {
           'image': 'assets/images/ic_camera.png',
           'text': 'กล้อง',
@@ -124,7 +123,7 @@ class HomePageController extends MyState<HomePage> {
         },
       {
         'image': 'assets/images/ic_gallery.png',
-        'text': Platform.isWindows ? 'รูปภาพ' : 'คลังภาพ',
+        'text': Platform.isWindows || Platform.isMacOS ? 'รูปภาพ' : 'คลังภาพ',
         'onClick': _pickFromGallery,
       },
       {
@@ -162,7 +161,7 @@ class HomePageController extends MyState<HomePage> {
           items: [
             DialogTileData(
               label:
-                  'โฟลเดอร์ของแอป${Platform.isWindows ? ' ' : '\n'}(App\'s Documents Folder)',
+                  'โฟลเดอร์ของแอป${Platform.isWindows || Platform.isMacOS ? ' ' : '\n'}(App\'s Documents Folder)',
               /*image: Image.asset(
                 'assets/images/ic_document.png',
                 width: Constants.LIST_DIALOG_ICON_SIZE,
@@ -189,10 +188,10 @@ class HomePageController extends MyState<HomePage> {
                 );
               },
             ),
-            // if (Platform.isIOS || Platform.isWindows)
+            // if (Platform.isIOS || Platform.isWindows || Platform.isMacOS)
             DialogTileData(
               label:
-                  'โฟลเดอร์อื่นๆ${Platform.isWindows ? ' ' : '\n'}(เลือกจาก System Dialog)',
+                  'โฟลเดอร์อื่นๆ${Platform.isWindows || Platform.isMacOS ? ' ' : '\n'}(เลือกจาก System Dialog)',
               image: Icon(
                 FontAwesomeIcons.sdCard,
                 size: Constants.LIST_DIALOG_ICON_SIZE,
@@ -282,27 +281,16 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _openSystemPicker2(BuildContext context,
-      {bool pickImage = false, bool pickVideo = false}) async {
+  _openSystemPicker2(BuildContext context) async {
     File _file;
 
     FilePickerResult result = await FilePicker.platform.pickFiles();
 
-    if (result != null) {
-      final file = File(result.files.single.path);
-      _file = file;
-      setState(() {
-        // print("fieleee ${_file.path}");
-      });
-    } else {
-      // User canceled the picker
-      // You can show snackbar or fluttertoast
-      // here like this to show warning to user
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please select file'),
-      ));
-    }
+    final file = File(result.files.single.path);
+    _file = file;
+    setState(() {
+      // print("fieleee ${_file.path}");
+    });
   }
 
   _openSystemPicker(BuildContext context,
@@ -344,8 +332,10 @@ class HomePageController extends MyState<HomePage> {
         );
       } else {
         pickedFile = await FilePickerCross.importFromStorage(
-          type: Platform.isWindows ? FileTypeCross.custom : FileTypeCross.any,
-          fileExtension: Platform.isWindows
+          type: Platform.isWindows || Platform.isMacOS
+              ? FileTypeCross.custom
+              : FileTypeCross.any,
+          fileExtension: Platform.isWindows || Platform.isMacOS
               ? Constants.selectableFileTypeList
                   .map((fileType) => fileType.fileExtension)
                   .fold('',
@@ -364,33 +354,31 @@ class HomePageController extends MyState<HomePage> {
       isLoading = false;
     }
 
-    if (pickedFile != null) {
-      var size = await pickedFile.length;
+    var size = await pickedFile.length;
 
-      if (size >= 20000000) {
-        setState(() {
-          showOkDialog(context, 'ผิดพลาด',
-              textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
-        });
-      } else {
-        var filePath = pickedFile.path;
-        isLoading = true;
+    if (size >= 20000000) {
+      setState(() {
+        showOkDialog(context, 'ผิดพลาด',
+            textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
+      });
+    } else {
+      var filePath = pickedFile.path;
+      isLoading = true;
 
-        if (_checkFileExtension(filePath)) {
-          var routeToGo = EncryptionPage.routeName;
-          if (p.extension(filePath).substring(1) == 'enc') {
-            routeToGo = DecryptionPage.routeName;
-          }
-
-          Navigator.pushNamed(
-            context,
-            routeToGo,
-            arguments: filePath,
-          );
+      if (_checkFileExtension(filePath)) {
+        var routeToGo = EncryptionPage.routeName;
+        if (p.extension(filePath).substring(1) == 'enc') {
+          routeToGo = DecryptionPage.routeName;
         }
 
-        isLoading = false;
+        Navigator.pushNamed(
+          context,
+          routeToGo,
+          arguments: filePath,
+        );
       }
+
+      isLoading = false;
     }
   }
 
@@ -435,7 +423,7 @@ class HomePageController extends MyState<HomePage> {
 
   _pickFromGallery(BuildContext context) async {
 // Windows
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isMacOS) {
       Navigator.pushNamed(
         context,
         CloudPickerPage.routeName,
@@ -534,7 +522,7 @@ class HomePageController extends MyState<HomePage> {
     });
 
     var googleDrive = GoogleDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows
+    var signInSuccess = Platform.isWindows || Platform.isMacOS
         ? await googleDrive.signInWithOAuth2()
         : await googleDrive.signIn();
 
@@ -559,7 +547,7 @@ class HomePageController extends MyState<HomePage> {
   }
 
   _pickFromOneDrive(BuildContext context) async {
-    /*if (Platform.isWindows) {
+    /*if (Platform.isWindows || Platform.isMacOS) {
       var oneDrive = OneDrive(CloudPickerMode.file);
       var signInSuccess = await oneDrive.signInWithOAuth2();
 
@@ -575,7 +563,7 @@ class HomePageController extends MyState<HomePage> {
     });
 
     var oneDrive = OneDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows
+    var signInSuccess = Platform.isWindows || Platform.isMacOS
         ? await oneDrive.signInWithOAuth2()
         : await oneDrive.signIn();
 
@@ -623,7 +611,7 @@ class HomePageController extends MyState<HomePage> {
     //logOneLineWithBorderSingle('EXTENSION LIST: $extensionList');
 
     var extension = p.extension(filePath);
-    if (extension == null || extension.trim().isEmpty) {
+    if (extension.trim().isEmpty) {
       showOkDialog(
         context,
         'ผิดพลาด',
@@ -661,7 +649,7 @@ class HomePageController extends MyState<HomePage> {
             textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
       });
     } else {
-      if (selectedFile != null && _checkFileExtension(selectedFile.path)) {
+      if (_checkFileExtension(selectedFile.path)) {
         Future.delayed(Duration(milliseconds: 500), () {
           isLoading = false;
 

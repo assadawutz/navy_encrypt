@@ -14,6 +14,7 @@ abstract class WidgetView<T1, T2> extends StatelessWidget {
 
 abstract class WidgetViewStateless<T1> extends StatelessWidget {
   final T1 widget;
+
   const WidgetViewStateless(this.widget, {Key key}) : super(key: key);
 
   @override

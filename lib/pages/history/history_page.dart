@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:navy_encrypt/common/encrypt_decrypt_header.dart';
 import 'package:navy_encrypt/common/header_scaffold.dart';
@@ -66,12 +66,10 @@ class _HistoryPageController extends MyState<HistoryPage> {
     final email = await MyPrefs.getEmail();
     final log = await MyApi().getLog(email);
 
-    if (_searchEditingController != null) {
-      List<Log> logFilter = log
-          .where((ele) => ele.fileName.contains(_searchEditingController.text))
-          .toList();
-      return logFilter;
-    }
+    List<Log> logFilter = log
+        .where((ele) => ele.fileName.contains(_searchEditingController.text))
+        .toList();
+    return logFilter;
 
     return log;
   }

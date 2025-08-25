@@ -37,7 +37,7 @@ class ICloudDrive extends CloudDrive {
         stream.listen(
           (progress) {
             print('--- Download File --- progress: $progress');
-            if (loadProgress != null) loadProgress(progress / 100);
+            loadProgress(progress / 100);
           },
           onDone: () {
             print('--- Download File --- DONE');
@@ -114,7 +114,7 @@ class ICloudDrive extends CloudDrive {
         stream.listen(
           (progress) {
             print('--- Upload File --- progress: $progress');
-            if (loadProgress != null) loadProgress(progress / 100);
+            loadProgress(progress / 100);
           },
           onDone: () {
             print('--- Upload File --- DONE');

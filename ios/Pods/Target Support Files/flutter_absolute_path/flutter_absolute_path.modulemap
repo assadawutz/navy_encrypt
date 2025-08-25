@@ -1,0 +1,6 @@
+framework module flutter_absolute_path {
+  umbrella header "flutter_absolute_path-umbrella.h"
+
+  export *
+  module * { export * }
+}

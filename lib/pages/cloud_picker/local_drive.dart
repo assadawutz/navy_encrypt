@@ -45,8 +45,7 @@ class LocalDrive extends CloudDrive {
       if (_pickerMode == CloudPickerMode.folder && !isFolder) continue;
 
       var fileExtension = '';
-      if (p.extension(fullPath) != null &&
-          p.extension(fullPath).trim().isNotEmpty) {
+      if (p.extension(fullPath).trim().isNotEmpty) {
         fileExtension = p.extension(fullPath).substring(1).toLowerCase();
       }
 

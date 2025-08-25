@@ -244,9 +244,7 @@ class _CloudPickerPageView
       }
 
       double ratio = 3;
-      if (state._fileItemSize != null) {
-        ratio = state._fileItemSize.width / state._fileItemSize.height;
-      }
+      ratio = state._fileItemSize.width / state._fileItemSize.height;
 
       return GridView.builder(
         padding: const EdgeInsets.only(bottom: 16.0),
@@ -372,38 +370,33 @@ class _FileItemState extends State<FileItem> {
                                         icon: FontAwesomeIcons.solidEdit,
                                       ),
                                     ),
-                                  if (fileSize != null)
-                                    Row(
-                                      children: [
-                                        FileAttributeItem(
-                                          text: fileSize.getDisplaySize(),
-                                          icon: FontAwesomeIcons.solidFileAlt,
+                                  Row(
+                                    children: [
+                                      FileAttributeItem(
+                                        text: fileSize.getDisplaySize(),
+                                        icon: FontAwesomeIcons.solidFileAlt,
+                                      ),
+                                      Container(
+                                        //margin: const EdgeInsets.only(left: 8.0),
+                                        width: 14.0,
+                                        height: 14.0,
+                                        decoration: BoxDecoration(
+                                          color: fileSize.getColor(),
+                                          border: Border.all(
+                                              color: Color(0xFFA8A8A8)),
+                                          shape: BoxShape.circle,
                                         ),
-                                        Container(
-                                          //margin: const EdgeInsets.only(left: 8.0),
-                                          width: 14.0,
-                                          height: 14.0,
-                                          decoration: BoxDecoration(
-                                            color: fileSize.getColor(),
-                                            border: Border.all(
-                                                color: Color(0xFFA8A8A8)),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                           ],
                         ),
                       ),
-                      if (!file.isFolder &&
-                          (file.thumbnailLink == null ||
-                              file.thumbnailLink.isEmpty))
+                      if (!file.isFolder && (file.thumbnailLink.isEmpty))
                         SizedBox(width: 16.0),
-                      if (!file.isFolder &&
-                          file.thumbnailLink != null &&
-                          file.thumbnailLink.isNotEmpty)
+                      if (!file.isFolder && file.thumbnailLink.isNotEmpty)
                         IconButton(
                           onPressed: () {
                             setState(() {
@@ -425,9 +418,7 @@ class _FileItemState extends State<FileItem> {
               ),
             ),
           ),
-          if (_showPreview &&
-              file.thumbnailLink != null &&
-              file.thumbnailLink.isNotEmpty)
+          if (_showPreview && file.thumbnailLink.isNotEmpty)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               color: Colors.blueGrey,

@@ -1,4 +1,3 @@
-import 'package:navy_encrypt/pages/settings/settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyPrefs {
@@ -18,11 +17,7 @@ class MyPrefs {
 
   static Future<void> setRefCode(String refCode) async {
     var sharedPref = await _getSharedPref();
-    if (refCode == null) {
-      await sharedPref.remove(KEY_REF_CODE);
-    } else {
-      await sharedPref.setString(KEY_REF_CODE, refCode);
-    }
+    await sharedPref.setString(KEY_REF_CODE, refCode);
   }
 
   static Future<String> getEmail() async {
@@ -31,11 +26,7 @@ class MyPrefs {
 
   static Future<void> setEmail(String email) async {
     var sharedPref = await _getSharedPref();
-    if (email == null) {
-      await sharedPref.remove(KEY_EMAIL);
-    } else {
-      await sharedPref.setString(KEY_EMAIL, email);
-    }
+    await sharedPref.setString(KEY_EMAIL, email);
   }
 
   static Future<String> getSecret() async {
@@ -44,11 +35,7 @@ class MyPrefs {
 
   static Future<void> setSecret(String secret) async {
     var sharedPref = await _getSharedPref();
-    if (secret == null) {
-      await sharedPref.remove(KEY_SECRET);
-    } else {
-      await sharedPref.setString(KEY_SECRET, secret);
-    }
+    await sharedPref.setString(KEY_SECRET, secret);
   }
 
   static Future<String> getOAuthCredentials(String serviceName) async {
@@ -56,14 +43,11 @@ class MyPrefs {
     return (await _getSharedPref()).getString(key);
   }
 
-  static Future<void> setOAuthCredentials(String serviceName, String credentials) async {
+  static Future<void> setOAuthCredentials(
+      String serviceName, String credentials) async {
     final key = '${serviceName}_${KEY_OAUTH_CREDENTIALS}';
 
     var sharedPref = await _getSharedPref();
-    if (credentials == null) {
-      await sharedPref.remove(key);
-    } else {
-      await sharedPref.setString(key, credentials);
-    }
+    await sharedPref.setString(key, credentials);
   }
 }

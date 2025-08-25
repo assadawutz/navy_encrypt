@@ -66,23 +66,22 @@ class MyDialog extends StatelessWidget {
           ),
           child: body,
         ),
-        if (headerImage != null)
-          Positioned(
-            left: 0.0,
-            right: 0.0,
-            child: Container(
-              width: 80.0,
-              height: 80.0,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(width: 4.0, color: Color(0xFF3EC2FF)),
-              ),
-              child: Center(
-                child: headerImage,
-              ),
+        Positioned(
+          left: 0.0,
+          right: 0.0,
+          child: Container(
+            width: 80.0,
+            height: 80.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(width: 4.0, color: Color(0xFF3EC2FF)),
+            ),
+            child: Center(
+              child: headerImage,
             ),
           ),
+        ),
       ],
     );
   }
@@ -113,7 +112,7 @@ class MyDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (title != null) title,
+            title,
             ...items
                 .map(
                   (e) => _buildDialogTile(

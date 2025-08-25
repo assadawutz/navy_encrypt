@@ -127,7 +127,6 @@ class _HistoryPageView extends WidgetView<HistoryPage, _HistoryPageController> {
                       onClick: state._handleClicktoSettingButton,
                     ),
                   ),
-                if (state._registerStatus == null) CircularProgressIndicator(),
               ])),
         if (state._registerStatus == WatermarkRegisterStatus.registered)
           Expanded(

@@ -6,7 +6,6 @@ import 'dart:io' show File, Platform;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -35,6 +34,8 @@ import 'package:navy_encrypt/services/api.dart';
 import 'package:navy_encrypt/storage/prefs.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
+
+// import 'package:share_plus/share_plus.dart';
 
 part 'cloud_picker_page_view.dart';
 
@@ -190,27 +191,25 @@ class _CloudPickerPageController extends MyState<CloudPickerPage> {
                 textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
           });
         } else {
-          if (file != null) {
-            var fileSize = await file.length();
-            var fSize = FileSize(fileSize);
-            var displayFileSize = fSize.getDisplaySize();
-            var displayFileByteSize = fSize.getDisplayByteSize();
+          var fileSize = await file.length();
+          var fSize = FileSize(fileSize);
+          var displayFileSize = fSize.getDisplaySize();
+          var displayFileByteSize = fSize.getDisplayByteSize();
 
-            logOneLineWithBorderSingle(
-                '$_title file download success. File saved at ${file.path}, $displayFileSize ($displayFileByteSize bytes)');
+          logOneLineWithBorderSingle(
+              '$_title file download success. File saved at ${file.path}, $displayFileSize ($displayFileByteSize bytes)');
 
-            logOneLineWithBorderDouble(
-                'File extension: ${cloudFile.fileExtension}');
+          logOneLineWithBorderDouble(
+              'File extension: ${cloudFile.fileExtension}');
 
-            Navigator.pushReplacementNamed(
-              context,
-              cloudFile.fileExtension.toLowerCase() ==
-                      Navec.encryptedFileExtension.toLowerCase()
-                  ? DecryptionPage.routeName
-                  : EncryptionPage.routeName,
-              arguments: file.path,
-            );
-          }
+          Navigator.pushReplacementNamed(
+            context,
+            cloudFile.fileExtension.toLowerCase() ==
+                    Navec.encryptedFileExtension.toLowerCase()
+                ? DecryptionPage.routeName
+                : EncryptionPage.routeName,
+            arguments: file.path,
+          );
         }
       } catch (error) {
         showOkDialog(
@@ -230,8 +229,7 @@ class _CloudPickerPageController extends MyState<CloudPickerPage> {
     }
 
     var isEncFile = false;
-    if (cloudFile.fileExtension != null &&
-        cloudFile.fileExtension.toLowerCase() == Navec.encryptedFileExtension) {
+    if (cloudFile.fileExtension.toLowerCase() == Navec.encryptedFileExtension) {
       isEncFile = true;
     }
 
@@ -336,8 +334,7 @@ class _CloudPickerPageController extends MyState<CloudPickerPage> {
 
   void _handleClickBreadcrumbItem(CloudFile folder) {
     var f = _folderIdStack.popTo(folder);
-    assert(f != null);
-    if (f != null) _changeFolder(f, addToStack: false);
+    _changeFolder(f, addToStack: false);
   }
 
   Future<void> _handleClickRefreshButton() async {
@@ -620,35 +617,22 @@ class _CloudPickerPageController extends MyState<CloudPickerPage> {
                                     .trim();
                               } catch (err) {}
 
-                              if (filePath != null) {
-                                var email = await MyPrefs.getEmail();
-                                var secret = await MyPrefs.getSecret();
-                                String fileName = '${p.basename(filePath)}';
-                                List<int> shareUserId = [];
-                                _shareSelected.forEach(
-                                    (User user) => shareUserId.add(user.id));
+                              var email = await MyPrefs.getEmail();
+                              var secret = await MyPrefs.getSecret();
+                              String fileName = '${p.basename(filePath)}';
+                              List<int> shareUserId = [];
+                              _shareSelected.forEach(
+                                  (User user) => shareUserId.add(user.id));
 
-                                final logId = await MyApi().saveLog(
-                                    email,
-                                    fileName,
-                                    uuid,
-                                    null,
-                                    'share',
-                                    'encryption',
-                                    secret,
-                                    shareUserId);
-                                if (logId == null) {
-                                  showOkDialog(
-                                    context,
-                                    'ผิดพลาด',
-                                    textContent:
-                                        'ไม่สามารถดำเนินการ\nหรือบัญชีของท่านรอการตรวจสอบ!',
-                                  );
-
-                                  isLoading = false;
-                                  return;
-                                }
-                              }
+                              final logId = await MyApi().saveLog(
+                                  email,
+                                  fileName,
+                                  uuid,
+                                  null,
+                                  'share',
+                                  'encryption',
+                                  secret,
+                                  shareUserId);
                             } catch (e) {
                               showOkDialog(context, e.toString());
                               isLoading = false;

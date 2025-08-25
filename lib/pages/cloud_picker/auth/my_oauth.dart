@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:navy_encrypt/storage/prefs.dart';
@@ -27,22 +28,20 @@ class MyOAuth {
 
   Future<oauth2.Client> connect() async {
     var credentialsJson = await MyPrefs.getOAuthCredentials(serviceName);
-    if (credentialsJson != null) {
-      var credentials = oauth2.Credentials.fromJson(credentialsJson);
-      if (credentials.isExpired) {
-        try {
-          credentials = await credentials.refresh();
-          await MyPrefs.setOAuthCredentials(serviceName, credentials.toJson());
-        } catch (e) {
-          print(e);
-          credentials = null;
-        }
+    var credentials = oauth2.Credentials.fromJson(credentialsJson);
+    if (credentials.isExpired) {
+      try {
+        credentials = await credentials.refresh();
+        await MyPrefs.setOAuthCredentials(serviceName, credentials.toJson());
+      } catch (e) {
+        print(e);
+        credentials = null;
       }
-      if (credentials != null) return oauth2.Client(credentials);
     }
+    return oauth2.Client(credentials);
 
     try {
-      await _redirectServer?.close();
+      await _redirectServer.close();
       // Bind to an ephemeral port on localhost
       _redirectServer = await HttpServer.bind('localhost', 0);
       var authenticatedHttpClient = await _getOAuth2Client(

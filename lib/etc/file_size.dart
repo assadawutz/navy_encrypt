@@ -11,8 +11,6 @@ class FileSize {
   FileSize(this._size);
 
   factory FileSize.fromString(String sizeText) {
-    if (sizeText == null) return null;
-
     var size = int.tryParse(sizeText.toString());
     return size != null ? FileSize(size) : null;
   }

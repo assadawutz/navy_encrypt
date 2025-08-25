@@ -4,7 +4,8 @@ class ProgressOverlay extends StatelessWidget {
   final String progressMessage;
   final double progressValue;
 
-  const ProgressOverlay({Key key, this.progressMessage, this.progressValue}) : super(key: key);
+  const ProgressOverlay({Key key, this.progressMessage, this.progressValue})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class ProgressOverlay extends StatelessWidget {
                 value: progressValue,
                 color: Colors.white.withOpacity(0.75),
               ),
-              if (progressMessage != null && progressMessage.trim().isNotEmpty)
+              if (progressMessage.trim().isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: Text(

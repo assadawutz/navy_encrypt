@@ -1,16 +1,13 @@
 library header_scaffold;
 
-import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:navy_encrypt/common/progress_overlay.dart';
 import 'package:navy_encrypt/common/widget_view.dart';
 import 'package:navy_encrypt/etc/utils.dart';
 import 'package:navy_encrypt/pages/settings/settings_page.dart';
 
 part 'header_scaffold_view.dart';
-
 part 'header_scaffold_view_win.dart';
 
 class HeaderScaffold extends StatelessWidget {
@@ -48,11 +45,7 @@ class HeaderScaffold extends StatelessWidget {
 
   void _handleClickBackButton(BuildContext context) {
     print('BACK BUTTON CLICKED!');
-    if (onClickBackButton != null) {
-      onClickBackButton();
-    } else {
-      Navigator.pop(context);
-    }
+    onClickBackButton();
   }
 
   void _handleClickSettingsButton(BuildContext context) {
@@ -61,7 +54,7 @@ class HeaderScaffold extends StatelessWidget {
       context,
       SettingsPage.routeName,
     ).then((_) {
-      if (onResume != null) onResume();
+      onResume();
     });
   }
 

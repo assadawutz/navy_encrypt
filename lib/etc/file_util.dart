@@ -1,13 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:path/path.dart' as p;
-import 'package:permission_handler/permission_handler.dart';
 
 class FileUtil {
   static Future<String> getTempDirPath() async {
@@ -24,10 +21,8 @@ class FileUtil {
       await myDocDir.create();
     }
 
-
     return myDocDir;
   }
-
 
   static Future<String> getImageDirPath() async {
     final appDocDirPath = (await getApplicationDocumentsDirectory()).path;

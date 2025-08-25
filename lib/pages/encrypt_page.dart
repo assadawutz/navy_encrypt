@@ -114,7 +114,7 @@ class _EncryptPageState extends State<EncryptPage> {
                           _encryptTextFieldFocusNode.unfocus();
                         },
                         style: TextButton.styleFrom(
-                          primary: Colors.white,
+                          foregroundColor: Colors.white,
                           backgroundColor: Theme.of(context).primaryColor,
                           //onSurface: Colors.grey,
                         ),
@@ -518,9 +518,8 @@ class _EncryptPageState extends State<EncryptPage> {
                                                       )),
                                           ),
                                   ),
-                                  onPressed: (item == null ||
-                                          (item == 'submit' &&
-                                              _passCode.length != 6))
+                                  onPressed: ((item == 'submit' &&
+                                          _passCode.length != 6))
                                       ? null
                                       : () => _handleClickPassCodeButton(
                                           item, setState),
@@ -545,9 +544,7 @@ class _EncryptPageState extends State<EncryptPage> {
                         }).toList(),
                       ),
                       SizedBox(height: 24.0),
-                      if (_passCodeTimeout != null &&
-                          _timer != null &&
-                          _timer.isActive)
+                      if (_timer.isActive)
                         Text(
                           'เหลือเวลาอีก ${_formatTimeCountDown(_passCodeTimeout)} นาที',
                           style: GoogleFonts.prompt(fontSize: 16.0),

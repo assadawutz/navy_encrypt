@@ -10,8 +10,8 @@ import 'package:navy_encrypt/pages/cloud_picker/cloud_drive.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_picker_page.dart';
 import 'package:navy_encrypt/pages/cloud_picker/onedrive/onedrive_api.dart';
 import 'package:navy_encrypt/pages/cloud_picker/onedrive/onedrive_api_oauth.dart';
-import 'package:path/path.dart' as p;
 import 'package:oauth2/oauth2.dart' as oauth2;
+import 'package:path/path.dart' as p;
 
 class OneDrive extends CloudDrive {
   static const callbackScheme = 'msal40e7380e-9025-41bc-95c7-e5ef1020f188';
@@ -65,10 +65,8 @@ class OneDrive extends CloudDrive {
       scope: scope,
     ).connect();
 
-    if (client != null) {
-      _oneDriveApiOAuth = OneDriveApiForOAuth(client);
-      return true;
-    }
+    _oneDriveApiOAuth = OneDriveApiForOAuth(client);
+    return true;
     return false;
   }
 
@@ -83,7 +81,6 @@ class OneDrive extends CloudDrive {
     final json = _oneDriveApiOAuth == null
         ? await _oneDriveApi.list(_currentFolder.id)
         : await _oneDriveApiOAuth.list(_currentFolder.id);
-    if (json == null) return null;
 
     _nextPageLink = null; //json['@odata.nextLink'];
     List driveItemList = json['value'] as List;
@@ -92,7 +89,7 @@ class OneDrive extends CloudDrive {
         .map((item) {
           final id = item['id'];
           final name = item['name'];
-          final extension = (p.extension(name)?.isNotEmpty ?? false)
+          final extension = (p.extension(name).isNotEmpty ?? false)
               ? p.extension(name).substring(1)
               : '';
           final size = item['size'].toString();

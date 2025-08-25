@@ -24,6 +24,12 @@
 @import file_picker;
 #endif
 
+#if __has_include(<firebase_auth/FLTFirebaseAuthPlugin.h>)
+#import <firebase_auth/FLTFirebaseAuthPlugin.h>
+#else
+@import firebase_auth;
+#endif
+
 #if __has_include(<firebase_core/FLTFirebaseCorePlugin.h>)
 #import <firebase_core/FLTFirebaseCorePlugin.h>
 #else
@@ -144,6 +150,7 @@
   [FLTDeviceInfoPlusPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTDeviceInfoPlusPlugin"]];
   [SwiftDiskSpacePlugin registerWithRegistrar:[registry registrarForPlugin:@"SwiftDiskSpacePlugin"]];
   [FilePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FilePickerPlugin"]];
+  [FLTFirebaseAuthPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseAuthPlugin"]];
   [FLTFirebaseCorePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCorePlugin"]];
   [FlutterAbsolutePathPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterAbsolutePathPlugin"]];
   [FlutterFileDialogPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterFileDialogPlugin"]];

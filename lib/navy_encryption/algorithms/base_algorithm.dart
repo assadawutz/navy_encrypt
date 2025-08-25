@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:navy_encrypt/navy_encryption/navec.dart';
 
 abstract class BaseAlgorithm {
@@ -9,9 +8,9 @@ abstract class BaseAlgorithm {
   final int keyLengthInBytes;
 
   const BaseAlgorithm({
-    @required this.code,
-    @required this.text,
-    @required this.keyLengthInBytes,
+    this.code,
+    this.text,
+    this.keyLengthInBytes,
   });
 
   /*static List<EncryptionAlgorithm> get list {
@@ -47,7 +46,7 @@ class NotEncrypt extends BaseAlgorithm {
       : super(
             code: Navec.notEncryptCode,
             text: 'ไม่เข้ารหัส',
-            keyLengthInBytes: null);
+            keyLengthInBytes: 0);
 
   @override
   Uint8List encrypt(String password, Uint8List bytes) => null;

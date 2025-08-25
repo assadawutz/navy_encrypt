@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_icons_null_safety/flutter_icons_null_safety.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:navy_encrypt/pages/step_page.dart';
 
@@ -148,12 +148,13 @@ class MenuItem extends StatelessWidget {
         ),
         child: TextButton(
           onPressed: () {
-            if (onPress != null) onPress();
+            onPress();
           },
           style: TextButton.styleFrom(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(menuItemCornerRadius)),
+              borderRadius:
+                  BorderRadius.all(Radius.circular(menuItemCornerRadius)),
             ),
           ),
           child: Column(

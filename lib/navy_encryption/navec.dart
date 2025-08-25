@@ -8,8 +8,7 @@ import 'package:navy_encrypt/etc/file_util.dart';
 import 'package:navy_encrypt/etc/utils.dart';
 import 'package:navy_encrypt/models/loading_message.dart';
 import 'package:navy_encrypt/navy_encryption/algorithms/aes.dart';
-import 'package:navy_encrypt/navy_encryption/algorithms/base_algorithm.dart';
-// import 'package:navy_encrypt/navy_encryption/algorithms/test.dart';
+import 'package:navy_encrypt/navy_encryption/algorithms/base_algorithm.dart'; // import 'package:navy_encrypt/navy_encryption/algorithms/test.dart';
 import 'package:navy_encrypt/navy_encryption/watermark.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
@@ -152,6 +151,7 @@ class Navec {
 
     return outFile;
   }
+
   // END encryptFile
 
   // static Future<List> decryptFile({
@@ -323,42 +323,26 @@ class Navec {
     );
 
     File outFile;
-    if (algo == null) {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไฟล์ถูกเข้ารหัสด้วย Algorithm ที่แอปนี้ไม่รองรับ',
-      );
-    } else {
-      var fileBytes = await File(filePath).readAsBytes();
+    fileBytes = await File(filePath).readAsBytes();
 
-      var decryptedBytes = algo.decrypt(
-          password, fileBytes.sublist(contentBeginIndex, contentEndIndex));
-      //
-      //
-      //
-      if (decryptedBytes == null) {
-        showOkDialog(
-          context,
-          'ผิดพลาด',
-          textContent: 'รหัสผ่านไม่ถูกต้อง หรือเกิดข้อผิดพลาดในการถอดรหัส',
-        );
-      } else {
-        var outFilename =
-            '${p.basenameWithoutExtension(filePath)}.$fileExtension';
-        logMap['Decrypted file name'] = outFilename;
+    var decryptedBytes = algo.decrypt(
+        password, fileBytes.sublist(contentBeginIndex, contentEndIndex));
+    //
+    //
+    //
+    var outFilename = '${p.basenameWithoutExtension(filePath)}.$fileExtension';
+    logMap['Decrypted file name'] = outFilename;
 
-        outFile = await FileUtil.createFileFromBytes(
-          outFilename,
-          Uint8List.fromList(decryptedBytes),
-        );
-        logMap['Decrypted file path'] = outFile.path;
-      }
-    }
+    outFile = await FileUtil.createFileFromBytes(
+      outFilename,
+      Uint8List.fromList(decryptedBytes),
+    );
+    logMap['Decrypted file path'] = outFile.path;
 
     logWithBorder(logMap, 2);
     return [outFile, uuid];
   }
+
   // END decryptFile
 
   static Future<File> addWatermark({

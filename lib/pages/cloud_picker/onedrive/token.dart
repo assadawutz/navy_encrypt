@@ -90,10 +90,6 @@ class DefaultTokenManager extends ITokenManager {
       if (DateTime.now().toUtc().isAfter(expAt)) {
         // expired, refresh
         final tokenMap = await _refreshToken();
-        if (tokenMap == null) {
-          // refresh failed
-          return null;
-        }
         // refresh success
         return tokenMap['access_token'];
       }

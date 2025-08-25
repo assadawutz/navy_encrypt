@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:archive/archive_io.dart';
 import 'package:async/async.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,11 +41,8 @@ class Watermark {
 
     if (email == null && secret == null) {
       return WatermarkRegisterStatus.initial;
-    } else if (email != null && secret == null) {
-      return WatermarkRegisterStatus.waitForSecret;
-    } else {
+    } else
       return WatermarkRegisterStatus.registered;
-    }
   }
 
   static Future<void> logout() async {
@@ -234,10 +229,8 @@ class Watermark {
     ByteData data = await (await picture.toImage(image.width, image.height))
         .toByteData(format: ui.ImageByteFormat.png);
 
-    if (total != null) {
-      Provider.of<LoadingMessage>(context, listen: false)
-          .setMessage('กำลังวาดลายน้ำลงในรูปภาพ ${++finishCount}/$total');
-    }
+    Provider.of<LoadingMessage>(context, listen: false)
+        .setMessage('กำลังวาดลายน้ำลงในรูปภาพ ${++finishCount}/$total');
 
     return _convertToJpgAndWriteToFile(data, filePath);
   }

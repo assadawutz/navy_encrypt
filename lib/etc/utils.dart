@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'dart:math';
 
-import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 
 void logOneLineWithBorderSingle(String text) {
@@ -25,7 +25,7 @@ void logOneLineWithBorderDouble(String text) {
 }
 
 void logWithBorder(Map<String, dynamic> logMap, int lines) {
-  if (logMap == null || logMap.isEmpty) return;
+  if (logMap.isEmpty) return;
 
   final topLeft = lines == 1 ? '┌' : '╔';
   final topRight = lines == 1 ? '┐' : '╗';
@@ -84,13 +84,13 @@ bool isLandscapeLayout(BuildContext context) {
 }
 
 Future<bool> isIpad() async {
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  if (Platform.isIOS) {
-    IosDeviceInfo info = await deviceInfo.iosInfo;
-    if (info.model.toLowerCase().contains("ipad")) {
-      return true;
-    }
-  }
+  // DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  // if (Platform.isIOS) {
+  //   IosDeviceInfo info = await deviceInfo.iosInfo;
+  //   if (info.model.toLowerCase().contains("ipad")) {
+  //     return true;
+  //   }
+  // }
 
   return false;
 }
@@ -112,25 +112,21 @@ Future<void> showAlertDialog(
 }) async {
   var contentWidgetList = <Widget>[];
 
-  if (textContent != null) {
-    contentWidgetList.addAll(
-      textContent
-          .split('\n')
-          .map<Widget>(
-            (line) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Text(
-                line,
-                style: TextStyle(fontSize: 22.0),
-              ),
+  contentWidgetList.addAll(
+    textContent
+        .split('\n')
+        .map<Widget>(
+          (line) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Text(
+              line,
+              style: TextStyle(fontSize: 22.0),
             ),
-          )
-          .toList(),
-    );
-  }
-  if (content != null) {
-    contentWidgetList.add(content);
-  }
+          ),
+        )
+        .toList(),
+  );
+  contentWidgetList.add(content);
 
   return showDialog<void>(
     context: context,
@@ -154,7 +150,7 @@ Future<void> showAlertDialog(
                 child: Text(button.label, style: TextStyle(fontSize: 22.0)),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  if (button.onClick != null) button.onClick();
+                  button.onClick();
                 },
               ),
             )

@@ -48,8 +48,7 @@ class _EncryptionPageViewWin
                       WatermarkRegisterStatus.registered)
                     Column(
                       children: [
-                        if (state._toBeEncryptedFilePath != null)
-                          FileDetails(filePath: state._toBeEncryptedFilePath),
+                        FileDetails(filePath: state._toBeEncryptedFilePath),
                         const SizedBox(height: 20.0),
                         _buildWatermarkField(),
                         const SizedBox(height: 20.0),

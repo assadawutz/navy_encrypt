@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:navy_encrypt/etc/utils.dart';
@@ -39,10 +40,8 @@ class _TestGoogleAuthPageState extends State<TestGoogleAuthPage> {
   @override
   Widget build(BuildContext context) {
     final client = _client;
-    if (client != null) {
-      showOkDialog(context, 'SUCCESS!');
-      return widget.builder(context, client);
-    }
+    showOkDialog(context, 'SUCCESS!');
+    return widget.builder(context, client);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +50,7 @@ class _TestGoogleAuthPageState extends State<TestGoogleAuthPage> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            await _redirectServer?.close();
+            await _redirectServer.close();
             // Bind to an ephemeral port on localhost
             _redirectServer = await HttpServer.bind('localhost', 0);
             var authenticatedHttpClient = await _getOAuth2Client(

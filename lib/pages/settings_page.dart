@@ -46,7 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     _waitPassCode = false;
                   });
                 },
-                child: Icon(Icons.settings, size: 80.0, color: Constants.primaryColor),
+                child: Icon(Icons.settings,
+                    size: 80.0, color: Constants.primaryColor),
               ),
               Container(
                 alignment: Alignment.centerLeft,
@@ -73,7 +74,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       SizedBox(width: 8.0),
                       Text(
                         'เปิดใช้งานระบบลายน้ำบนอุปกรณ์นี้แล้ว',
-                        style: GoogleFonts.prompt(fontSize: 14.0, color: Colors.green),
+                        style: GoogleFonts.prompt(
+                            fontSize: 14.0, color: Colors.green),
                       ),
                     ],
                   ),
@@ -86,12 +88,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         _showBottomSheet();
                       },
                       style: TextButton.styleFrom(
-                        primary: Colors.white,
+                        foregroundColor: Colors.white,
                         backgroundColor: Theme.of(context).primaryColor,
                         //onSurface: Colors.grey,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -116,12 +119,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         _showBottomSheet();
                       },
                       style: TextButton.styleFrom(
-                        primary: Colors.white,
+                        foregroundColor: Colors.white,
                         backgroundColor: Theme.of(context).primaryColor,
                         //onSurface: Colors.grey,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4.0, horizontal: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -153,7 +157,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       child: Text(
                         'กรอกคีย์ (Private Key) ที่ได้รับทางอีเมล เพื่อเปิดใช้งานระบบลายน้ำบนอุปกรณ์นี้',
-                        style: GoogleFonts.prompt(fontSize: 14.0, color: Colors.redAccent),
+                        style: GoogleFonts.prompt(
+                            fontSize: 14.0, color: Colors.redAccent),
                       ),
                     ),
                     Form(
@@ -206,7 +211,8 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
           _modalSetState = setState;
 
           /*if (_waitPassCode && _timer == null) {
@@ -243,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       SizedBox(height: 24.0),
                       SizedBox(height: 24.0),
                       SizedBox(height: 24.0),
-                      if (_passCodeTimeout != null && _timer != null && _timer.isActive)
+                      if (_timer.isActive)
                         Text(
                           'เหลือเวลาอีก ${_formatTimeCountDown(_passCodeTimeout)} นาที',
                           style: GoogleFonts.prompt(fontSize: 16.0),
@@ -298,7 +304,8 @@ class _SettingsPageState extends State<SettingsPage> {
     ).whenComplete(() {
       print('+++++ BOTTOM SHEET CLOSED COMPLETELY! +++++');
       //_watermarkButtonFocusNode.requestFocus();
-      Future.delayed(Duration(milliseconds: 500), () => _isBottomSheetOpen = false);
+      Future.delayed(
+          Duration(milliseconds: 500), () => _isBottomSheetOpen = false);
       //_isBottomSheetOpen = false;
     });
   }

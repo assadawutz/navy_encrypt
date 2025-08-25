@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart' as enc;
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:navy_encrypt/etc/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -66,8 +65,9 @@ class _TestEncryptionState extends State<TestEncryption> {
                   Uint8List decryptedData = decrypt(bytes);
                   File outFile = await getTempFile('120m.navdc');
                   outFile.writeAsBytes(decryptedData);
-                } on OutOfMemoryError catch(e) {
-                  showOkDialog(context, 'ERROR', textContent: 'หน่วยความจำไม่พอ (Out of Memory)');
+                } on OutOfMemoryError {
+                  showOkDialog(context, 'ERROR',
+                      textContent: 'หน่วยความจำไม่พอ (Out of Memory)');
                 } catch (e) {
                   showOkDialog(context, 'ERROR', textContent: e.toString());
                 }
@@ -99,8 +99,7 @@ class MyButton extends StatelessWidget {
     return TextButton(
       onPressed: () => onClick != null ? onClick() : null,
       style: TextButton.styleFrom(
-        padding: EdgeInsets.all(14.0),
-        primary: textColor,
+        foregroundColor: textColor, padding: EdgeInsets.all(14.0),
         backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
         //onSurface: Colors.grey,
       ),
@@ -120,9 +119,26 @@ Future<File> getTempFile(String name) async {
 }
 
 const dot10 = '..........';
-const dot100 = dot10 + dot10 + dot10 + dot10 + dot10 + dot10 + dot10 + dot10 + dot10 + dot10;
-const dot1000 =
-    dot100 + dot100 + dot100 + dot100 + dot100 + dot100 + dot100 + dot100 + dot100 + dot100;
+const dot100 = dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10 +
+    dot10;
+const dot1000 = dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100 +
+    dot100;
 const dot10000 = dot1000 +
     dot1000 +
     dot1000 +
@@ -177,8 +193,10 @@ enc.Encrypted encrypt(Uint8List bytes) {
   int start = DateTime.now().millisecondsSinceEpoch;
   //final encrypted = encrypter.encrypt(plainText, iv: iv);
   final enc.Encrypted encryptedByte = encrypter.encryptBytes(bytes, iv: iv);
-  print('The size of encrypted data is ${formatter.format(encryptedByte.bytes.length)} bytes');
-  print('Encryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
+  print(
+      'The size of encrypted data is ${formatter.format(encryptedByte.bytes.length)} bytes');
+  print(
+      'Encryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
 
   return encryptedByte;
 }
@@ -199,7 +217,8 @@ Uint8List decrypt(Uint8List bytes) {
 
   final decrypted = encrypter.decryptBytes(enc.Encrypted(bytes), iv: iv);
   //final decryptedByte = encrypter.decryptBytes(encryptedByte, iv: iv);
-  print('Decryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
+  print(
+      'Decryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
   return Uint8List.fromList(decrypted);
 }
 
@@ -227,13 +246,16 @@ void _testEncryption() {
   int start = DateTime.now().millisecondsSinceEpoch;
   final encrypted = encrypter.encrypt(plainText, iv: iv);
   //final enc.Encrypted encryptedByte = encrypter.encryptBytes(bytes, iv: iv);
-  print('The size of encrypted data is ${formatter.format(encrypted.bytes.length)} bytes');
-  print('Encryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
+  print(
+      'The size of encrypted data is ${formatter.format(encrypted.bytes.length)} bytes');
+  print(
+      'Encryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
 
   start = DateTime.now().millisecondsSinceEpoch;
   final decrypted = encrypter.decrypt(encrypted, iv: iv);
   //final decryptedByte = encrypter.decryptBytes(encryptedByte, iv: iv);
-  print('Decryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
+  print(
+      'Decryption time: ${(DateTime.now().millisecondsSinceEpoch - start) / 1000} seconds');
 
   //print(decrypted);
   //print(encrypted.base64);

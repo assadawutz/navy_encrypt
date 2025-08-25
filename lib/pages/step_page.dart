@@ -21,6 +21,7 @@ class _StepPageState extends State<StepPage> {
   final _watermarkFormKey = GlobalKey<FormState>();
   final _encryptFormKey = GlobalKey<FormState>();
   final _emailFormKey = GlobalKey<FormState>();
+
   //final TextEditingController _watermarkPrivateKeyController = TextEditingController();
   final TextEditingController _watermarkTextController =
       TextEditingController();
@@ -28,6 +29,7 @@ class _StepPageState extends State<StepPage> {
       TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   int _encryptAlgorithmValue;
+
   //bool _watermarkPrivateKeyVisible = false;
   bool _encryptPasswordVisible = false;
   FocusNode _focusNode;
@@ -132,7 +134,7 @@ class _StepPageState extends State<StepPage> {
                               );
                             },
                             style: TextButton.styleFrom(
-                              primary: Colors.white,
+                              foregroundColor: Colors.white,
                               backgroundColor: Theme.of(context).primaryColor,
                               //onSurface: Colors.grey,
                             ),
@@ -388,7 +390,7 @@ class _StepPageState extends State<StepPage> {
                               TextButton(
                                 onPressed: () {},
                                 style: TextButton.styleFrom(
-                                  primary: Colors.white,
+                                  foregroundColor: Colors.white,
                                   backgroundColor:
                                       Theme.of(context).primaryColor,
                                   //onSurface: Colors.grey,
@@ -412,7 +414,7 @@ class _StepPageState extends State<StepPage> {
                               TextButton(
                                 onPressed: () {},
                                 style: TextButton.styleFrom(
-                                  primary: Colors.white,
+                                  foregroundColor: Colors.white,
                                   backgroundColor:
                                       Theme.of(context).primaryColor,
                                   //onSurface: Colors.grey,
@@ -766,9 +768,8 @@ class _StepPageState extends State<StepPage> {
                                                       )),
                                           ),
                                   ),
-                                  onPressed: (item == null ||
-                                          (item == 'submit' &&
-                                              _passCode.length != 6))
+                                  onPressed: ((item == 'submit' &&
+                                          _passCode.length != 6))
                                       ? null
                                       : () => _handleClickPassCodeButton(
                                           item, setState),
@@ -793,9 +794,7 @@ class _StepPageState extends State<StepPage> {
                         }).toList(),
                       ),
                       SizedBox(height: 24.0),
-                      if (_passCodeTimeout != null &&
-                          _timer != null &&
-                          _timer.isActive)
+                      if (_timer.isActive)
                         Text(
                           'เหลือเวลาอีก ${_formatTimeCountDown(_passCodeTimeout)} นาที',
                           style: GoogleFonts.prompt(fontSize: 16.0),
@@ -956,11 +955,11 @@ class StepperControls extends StatelessWidget {
             TextButton(
               onPressed: onClickPrevious != null
                   ? () {
-                      if (onClickPrevious != null) onClickPrevious();
+                      onClickPrevious();
                     }
                   : null,
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: onClickPrevious != null
                     ? Theme.of(context).primaryColor
                     : Colors.grey[200],
@@ -976,11 +975,11 @@ class StepperControls extends StatelessWidget {
             TextButton(
               onPressed: onClickNext != null
                   ? () {
-                      if (onClickNext != null) onClickNext();
+                      onClickNext();
                     }
                   : null,
               style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: onClickNext != null
                     ? Theme.of(context).primaryColor
                     : Colors.grey[200],
@@ -1005,10 +1004,10 @@ class StepperControls extends StatelessWidget {
             onClickSkip != null
                 ? TextButton(
                     onPressed: () {
-                      if (onClickSkip != null) onClickSkip();
+                      onClickSkip();
                     },
                     style: TextButton.styleFrom(
-                      primary: Colors.white,
+                      foregroundColor: Colors.white,
                       backgroundColor: Colors.orangeAccent,
                       //onSurface: Colors.grey,
                     ),

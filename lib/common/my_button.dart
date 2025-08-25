@@ -54,22 +54,21 @@ class MyButton extends StatelessWidget {
                 ),
               ),
             ),
-            if (rightIcon != null)
-              Positioned.fill(
-                child: Container(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: rightIcon,
-                  ),
+            Positioned.fill(
+              child: Container(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: rightIcon,
                 ),
               ),
+            ),
           ],
         ),
       ),
       style: isOutlinedButton
           ? OutlinedButton.styleFrom(
-              primary: Color(0xFF717171),
+              foregroundColor: Color(0xFF717171),
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
@@ -78,8 +77,8 @@ class MyButton extends StatelessWidget {
               backgroundColor: Colors.white,
             )
           : ElevatedButton.styleFrom(
-              primary: backgroundColor,
-              onPrimary: textColor,
+              foregroundColor: textColor,
+              backgroundColor: backgroundColor,
               //change text color of button
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(

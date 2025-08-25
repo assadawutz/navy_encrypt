@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:io' show Platform;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,14 +37,21 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 Future<void> main(List<String> arguments) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // get command-line arg in desktop app
-  if (Platform.isAndroid == true || Platform.isIOS == true) {
+  // if (Platform.isAndroid == true || Platform.isIOS == true) {
+  if (Platform.isWindows) {
+  } else {
+    // WidgetsFlutterBinding.ensureInitialized();
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
   }
 
+  // }
+
 // Ideal time to initialize
-//   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -56,6 +63,8 @@ Future<void> main(List<String> arguments) async {
 
   if (arguments.isNotEmpty) {
     filePathFromCli = arguments[0];
+  } else {
+    filePathFromCli = "";
   }
 
   runApp(ChangeNotifierProvider(
@@ -71,7 +80,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static const platform = MethodChannel('app.channel.shared.data');
-  GlobalKey<HomePageController> _keyHomePage = GlobalKey();
+  final GlobalKey<HomePageController> _keyHomePage = GlobalKey();
 
   ShareIntentHandler _shareIntentHandler;
 
@@ -89,7 +98,7 @@ class _MyAppState extends State<MyApp> {
         Future.delayed(Duration.zero, () {
           if (isAppOpen) {
             if (_keyHomePage.currentState != null) {
-              _keyHomePage.currentState.handleIntent(filePath);
+              _keyHomePage.currentState?.handleIntent(filePath);
             }
           } else {
             setState(() {
@@ -129,22 +138,24 @@ class _MyAppState extends State<MyApp> {
     String version = packageInfo.version;
     String buildNumber = packageInfo.buildNumber;*/
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isMacOS) {
       setWindowTitle('รับส่งไฟล์');
     }
     return MaterialApp(
       title: 'รับส่งไฟล์',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'DBHeavent',
         primaryColor: Constants.primaryColor,
         materialTapTargetSize: MaterialTapTargetSize.padded,
-        textTheme: TextTheme(
-          button: TextStyle(fontSize: 22.0),
+        textTheme: const TextTheme(
+          labelLarge: TextStyle(fontSize: 22.0),
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
             foregroundColor: Constants.accentColor,
-            padding: EdgeInsets.all(Platform.isWindows ? 20.0 : 12.0),
+            padding: EdgeInsets.all(
+                Platform.isWindows || Platform.isMacOS ? 20.0 : 12.0),
           ),
         ),
         /*elevatedButtonTheme: ElevatedButtonThemeData(
@@ -242,9 +253,9 @@ class _MyAppState extends State<MyApp> {
 
   Widget _getHome() {
     Widget pageToGo;
-
-    if (_filePath == null) {
-      pageToGo = SplashPage();
+    if (_filePath == "") {
+      pageToGo = HomePage(key: _keyHomePage, filePath: _filePath);
+      return pageToGo;
     } else {
       var dotIndex = _filePath.lastIndexOf('.');
       if (dotIndex != -1 &&
@@ -253,9 +264,9 @@ class _MyAppState extends State<MyApp> {
       } else {
         pageToGo = HomePage(key: _keyHomePage, filePath: _filePath);
       }
-    }
 
-    _filePath = null;
-    return pageToGo;
+      _filePath = null;
+      return pageToGo;
+    }
   }
 }

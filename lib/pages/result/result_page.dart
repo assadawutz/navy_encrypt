@@ -80,7 +80,7 @@ class _ResultPageController extends MyState<ResultPage> {
     _fileEncryptPath =
         arguments['fileEncryptPath'] ?? arguments['filePath'] as String;
 
-    assert(_filePath != null && _filePath.isNotEmpty);
+    assert(_filePath.isNotEmpty);
 
     _isEncFile = arguments['isEncryption'] as bool;
     _signatureCode = arguments['signatureCode'] as String;
@@ -95,7 +95,7 @@ class _ResultPageController extends MyState<ResultPage> {
 
   bool _isImageFile() {
     var extension = p.extension(_filePath);
-    if (extension?.isEmpty ?? true) return false;
+    if (extension.isEmpty ?? true) return false;
     return Constants.imageFileTypeList
         .where((type) =>
             type.fileExtension.toLowerCase() ==
@@ -358,37 +358,28 @@ class _ResultPageController extends MyState<ResultPage> {
           fileName: p.basename(_filePath),
           //type: FileType.image,
         );
-        if (outputFilePath == null) {
-          // User canceled the picker
-        } else {
-          await _saveFile(outputFilePath, isFullPath: true);
-        }
+        await _saveFile(outputFilePath, isFullPath: true);
       } else {
         // Pick a directory
         String selectedDirectory = await FilePicker.platform.getDirectoryPath();
-        if (selectedDirectory == null) {
-          // User canceled the picker
-          //isLoading = false;
-        } else {
-          logOneLineWithBorderDouble('SELECTED DIR: $selectedDirectory');
+        logOneLineWithBorderDouble('SELECTED DIR: $selectedDirectory');
 
-          var status = await Permission.storage.status;
+        var status = await Permission.storage.status;
+        if (status.isGranted) {
+          await _saveFile(selectedDirectory);
+        } else {
+          status = await Permission.storage.request();
           if (status.isGranted) {
             await _saveFile(selectedDirectory);
           } else {
-            status = await Permission.storage.request();
-            if (status.isGranted) {
-              await _saveFile(selectedDirectory);
-            } else {
-              showOkDialog(
-                context,
-                'ผิดพลาด',
-                textContent: 'แอปไม่ได้รับอนุญาตให้บันทึกไฟล์',
-              );
-            }
+            showOkDialog(
+              context,
+              'ผิดพลาด',
+              textContent: 'แอปไม่ได้รับอนุญาตให้บันทึกไฟล์',
+            );
           }
-          //isLoading = false;
         }
+        //isLoading = false;
       }
     });
   }
@@ -1062,8 +1053,7 @@ class _ResultPageController extends MyState<ResultPage> {
             .trim();
       } catch (err) {}
 
-      if (((_type == 'encryption' && uuid != null) || (_type == 'watermark')) &&
-          _fileEncryptPath != null) {
+      if (((_type == 'encryption') || (_type == 'watermark'))) {
         var email = await MyPrefs.getEmail();
         var secret = await MyPrefs.getSecret();
         String fileName = '${p.basename(_fileEncryptPath)}';
@@ -1075,16 +1065,6 @@ class _ResultPageController extends MyState<ResultPage> {
         final logId = await MyApi().saveLog(email, fileName, uuid,
             _signatureCode, 'share', _type, secret, shareUserId);
         print("onShare = ${logId}");
-        if (logId == null) {
-          showOkDialog(
-            context,
-            'ผิดพลาด',
-            textContent: 'ไม่สามารถดำเนินการ\nหรือบัญชีของท่านรอการตรวจสอบ!',
-          );
-
-          isLoading = false;
-          // return;
-        }
         await prefs.setString(logId.toString(), shareUserId.toString());
 
         status = true;

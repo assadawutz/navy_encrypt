@@ -43,7 +43,8 @@ class _HeaderScaffoldViewWin extends WidgetViewStateless<HeaderScaffold> {
                                 children: [
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text('กองทัพเรือ',
                                           style: TextStyle(
@@ -75,8 +76,9 @@ class _HeaderScaffoldViewWin extends WidgetViewStateless<HeaderScaffold> {
                                       child: _buildHeaderButton(
                                           Icons.settings,
                                           'ตั้งค่า',
-                                          () => widget._handleClickSettingsButton(
-                                              context)),
+                                          () =>
+                                              widget._handleClickSettingsButton(
+                                                  context)),
                                     ),
                                 ],
                               ),
