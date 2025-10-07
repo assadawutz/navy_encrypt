@@ -51,10 +51,10 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageController extends MyState<ResultPage> {
-  String _filePath;
+  String _processedFilePath;
   String _message;
   bool _isEncFile;
-  String _fileEncryptPath;
+  String _originalInputPath;
   List<User> _shareSelected;
   String _signatureCode;
   String _type;
@@ -73,28 +73,39 @@ class _ResultPageController extends MyState<ResultPage> {
   Widget build(BuildContext context) {
     // print(
     //     "_multiSelectKey.currentState.validate()${_multiSelectKey.currentState.value()}");
-    var arguments =
+    final arguments =
         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-    _filePath = arguments['filePath'] as String;
+    _processedFilePath = (arguments['processedFilePath'] ??
+            arguments['filePath'])
+        as String;
     _message = arguments['message'] as String;
-    _fileEncryptPath =
-        arguments['fileEncryptPath'] ?? arguments['filePath'] as String;
+    _originalInputPath = (arguments['originalInputPath'] ??
+            arguments['fileEncryptPath'] ??
+            _processedFilePath) as String;
 
-    assert(_filePath.isNotEmpty);
+    assert(_processedFilePath?.isNotEmpty ?? false);
 
-    _isEncFile = arguments['isEncryption'] as bool;
+    final isEncryptedArgument = arguments['isEncryptedFile'];
+    if (isEncryptedArgument is bool) {
+      _isEncFile = isEncryptedArgument;
+    } else if (arguments['isEncryption'] is bool) {
+      _isEncFile = !(arguments['isEncryption'] as bool);
+    } else {
+      final extension = p.extension(_processedFilePath).toLowerCase();
+      _isEncFile = extension == '.${Navec.encryptedFileExtension}';
+    }
     _signatureCode = arguments['signatureCode'] as String;
     _type = arguments['type'] as String;
 
-    //p.extension(_filePath).substring(1) == Navec.encryptedFileExtension;
+    //p.extension(_processedFilePath).substring(1) == Navec.encryptedFileExtension;
 
-    logOneLineWithBorderSingle('File path: $_filePath');
+    logOneLineWithBorderSingle('File path: $_processedFilePath');
 
     return _ResultPageView(this);
   }
 
   bool _isImageFile() {
-    var extension = p.extension(_filePath);
+    var extension = p.extension(_processedFilePath);
     if (extension.isEmpty ?? true) return false;
     return Constants.imageFileTypeList
         .where((type) =>
@@ -107,7 +118,7 @@ class _ResultPageController extends MyState<ResultPage> {
     Navigator.pushReplacementNamed(
       context,
       EncryptionPage.routeName,
-      arguments: _filePath,
+      arguments: _processedFilePath,
     );
   }
 
@@ -198,9 +209,6 @@ class _ResultPageController extends MyState<ResultPage> {
                 height: Constants.LIST_DIALOG_ICON_SIZE,
               ),
               onClick: () {
-                setState(() {
-                  _saveStstus = true;
-                });
                 _saveToGoogleDrive();
                 Navigator.of(context).pop();
               },
@@ -213,9 +221,6 @@ class _ResultPageController extends MyState<ResultPage> {
                 height: Constants.LIST_DIALOG_ICON_SIZE,
               ),
               onClick: () {
-                setState(() {
-                  _saveStstus = true;
-                });
                 _saveToOneDrive();
                 Navigator.of(context).pop();
               },
@@ -237,12 +242,12 @@ class _ResultPageController extends MyState<ResultPage> {
         context,
         CloudPickerPage.routeName,
         arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'รูปภาพ',
           headerImagePath: 'assets/images/ic_gallery.png',
           rootName: 'Pictures',
         ),
-        //arguments: localDrive..fileToUpload = File(_filePath),
+        //arguments: localDrive..fileToUpload = File(_processedFilePath),
       );
       return;
     }
@@ -267,7 +272,7 @@ class _ResultPageController extends MyState<ResultPage> {
   }
 
   _doSaveToGallery() async {
-    var file = File(_filePath);
+    var file = File(_processedFilePath);
     var result = await ImageGallerySaver.saveImage(
       await file.readAsBytes(),
       quality: 100,
@@ -293,10 +298,10 @@ class _ResultPageController extends MyState<ResultPage> {
   //
   //   encoder.create(appDocDirectory.path + "/" + 'jay2.zip');
   //
-  //   encoder.addFile(File(_filePath));
+  //   encoder.addFile(File(_processedFilePath));
   //
   //   encoder.close();
-  //   final bytes = File(_filePath).readAsBytesSync();
+  //   final bytes = File(_processedFilePath).readAsBytesSync();
   //
   //   Navigator.pushNamed(
   //     context,
@@ -306,7 +311,7 @@ class _ResultPageController extends MyState<ResultPage> {
   //         title: 'โฟลเดอร์ของแอป',
   //         headerImagePath: 'assets/images/ic_document.png',
   //         rootName: 'App\'s Folder'),
-  //     //arguments: localDrive..fileToUpload = File(_filePath),
+  //     //arguments: localDrive..fileToUpload = File(_processedFilePath),
   //   );
   // }
 
@@ -319,11 +324,11 @@ class _ResultPageController extends MyState<ResultPage> {
       context,
       CloudPickerPage.routeName,
       arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'โฟลเดอร์ของแอป',
           headerImagePath: 'assets/images/ic_document.png',
           rootName: 'App\'s Folder'),
-      //arguments: localDrive..fileToUpload = File(_filePath),
+      //arguments: localDrive..fileToUpload = File(_processedFilePath),
     );
   }
 
@@ -336,11 +341,11 @@ class _ResultPageController extends MyState<ResultPage> {
       context,
       CloudPickerPage.routeName,
       arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'iCloud',
           headerImagePath: 'assets/images/ic_icloud.png',
           rootName: 'iCloud'),
-      //arguments: localDrive..fileToUpload = File(_filePath),
+      //arguments: localDrive..fileToUpload = File(_processedFilePath),
     );
   }
 
@@ -355,7 +360,7 @@ class _ResultPageController extends MyState<ResultPage> {
         // Save-file / save-as dialog - ใช้ได้เฉพาะ desktop
         String outputFilePath = await FilePicker.platform.saveFile(
           dialogTitle: 'เลือกโฟลเดอร์และชื่อไฟล์ที่จะบันทึก',
-          fileName: p.basename(_filePath),
+          fileName: p.basename(_processedFilePath),
           //type: FileType.image,
         );
         if (outputFilePath == null) {
@@ -408,14 +413,14 @@ class _ResultPageController extends MyState<ResultPage> {
       return;
     }
     var targetPath =
-        isFullPath ? selectedPath : p.join(selectedPath, p.basename(_filePath));
+        isFullPath ? selectedPath : p.join(selectedPath, p.basename(_processedFilePath));
     logOneLineWithBorderSingle('COPYING TO $targetPath');
-    print('COPYING TO ${p.basename(_filePath)}');
+    print('COPYING TO ${p.basename(_processedFilePath)}');
     try {
       isLoading = true;
       loadingMessage = 'กำลังบันทึกไฟล์';
 
-      await File(_filePath).copy(targetPath);
+      await File(_processedFilePath).copy(targetPath);
       showOkDialog(
         context,
         'สำเร็จ',
@@ -436,65 +441,96 @@ class _ResultPageController extends MyState<ResultPage> {
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน Google Drive';
     var googleDrive = GoogleDrive(CloudPickerMode.folder);
-    var signInSuccess = Platform.isWindows
-        ? await googleDrive.signInWithOAuth2()
-        : await googleDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: googleDrive..fileToUpload = File(_filePath),
-          title: 'Google Drive',
-          headerImagePath: 'assets/images/ic_google_drive.png',
-          rootName: 'Drive',
-        ),
-        //arguments: googleDrive..fileToUpload = File(_filePath),
+    try {
+      await runCloudSignInWorkflow(
+        signIn: () => Platform.isWindows
+            ? googleDrive.signInWithOAuth2()
+            : googleDrive.signIn(),
+        updateSaveStatus: _updateSaveStatus,
+        onSuccess: () {
+          return Navigator.pushNamed(
+            context,
+            CloudPickerPage.routeName,
+            arguments: CloudPickerPageArg(
+              cloudDrive: googleDrive..fileToUpload = File(_processedFilePath),
+              title: 'Google Drive',
+              headerImagePath: 'assets/images/ic_google_drive.png',
+              rootName: 'Drive',
+            ),
+          );
+        },
+        onFailure: (error) {
+          var message = 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้';
+          if (error != null) {
+            message += '\n$error';
+          }
+          return showOkDialog(
+            context,
+            'ผิดพลาด',
+            textContent: message,
+          );
+        },
       );
-    } else {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
-      );
+    } finally {
+      isLoading = false;
     }
-    isLoading = false;
   }
 
   _saveToOneDrive() async {
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน OneDrive';
     var oneDrive = OneDrive(CloudPickerMode.folder);
-    var signInSuccess = Platform.isWindows
-        ? await oneDrive.signInWithOAuth2()
-        : await oneDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive..fileToUpload = File(_filePath),
-          title: 'OneDrive',
-          headerImagePath: 'assets/images/ic_onedrive_new.png',
-          rootName: 'Drive',
-        ),
+    try {
+      await runCloudSignInWorkflow(
+        signIn: () => Platform.isWindows
+            ? oneDrive.signInWithOAuth2()
+            : oneDrive.signIn(),
+        updateSaveStatus: _updateSaveStatus,
+        onSuccess: () {
+          return Navigator.pushNamed(
+            context,
+            CloudPickerPage.routeName,
+            arguments: CloudPickerPageArg(
+              cloudDrive: oneDrive..fileToUpload = File(_processedFilePath),
+              title: 'OneDrive',
+              headerImagePath: 'assets/images/ic_onedrive_new.png',
+              rootName: 'Drive',
+            ),
+          );
+        },
+        onFailure: (error) {
+          var message = 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้';
+          if (error != null) {
+            message += '\n$error';
+          }
+          return showOkDialog(
+            context,
+            'ผิดพลาด',
+            textContent: message,
+          );
+        },
       );
-    } else {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
-      );
+    } finally {
+      isLoading = false;
     }
-    isLoading = false;
+  }
+
+  void _updateSaveStatus(bool value) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _saveStstus = value;
+    });
   }
 
   _handleClickShareButton() async {
+    final pathToShare = _processedFilePath;
     if (await isIpad()) {
       Share.shareFiles(
-        _isEncFile == false ? [_filePath] : [_fileEncryptPath],
+        [pathToShare],
         sharePositionOrigin: Rect.fromLTWH(
           0,
           0,
@@ -504,13 +540,13 @@ class _ResultPageController extends MyState<ResultPage> {
       );
     } else {
       Share.shareFiles(
-        _isEncFile == false ? [_filePath] : [_fileEncryptPath],
+        [pathToShare],
       );
     }
   }
 
   _handleClickOpenButton() {
-    OpenFile.open(_filePath).then((result) {
+    OpenFile.open(_processedFilePath).then((result) {
       if (result.type == ResultType.noAppToOpen) {
         showOkDialog(
           context,
@@ -645,14 +681,21 @@ class _ResultPageController extends MyState<ResultPage> {
                       fontFamily: 'DBHeavent',
                     ),
                     onConfirm: (results) async {
-                      print("getEMail =${results[0].email}");
+                      if (results == null || results.isEmpty) {
+                        setState(() {
+                          _shareSelected = [];
+                        });
+                        _multiSelectKey.currentState?.validate();
+                        return;
+                      }
+                      print("getEMail =${results.first.email}");
                       // print("getEMail =${results[1].email}");
                       setState(() {
                         _shareSelected = results;
                       });
                       // print("_shareSelected =${_shareSelected}");
 
-                      _multiSelectKey.currentState.validate();
+                      _multiSelectKey.currentState?.validate();
 
                       // List<int> shareUserId = [];
                       // _shareSelected
@@ -720,7 +763,7 @@ class _ResultPageController extends MyState<ResultPage> {
                                     _shareSelected
                                         .remove(_shareSelected[index]);
                                   });
-                                  _multiSelectKey.currentState.validate();
+                                  _multiSelectKey.currentState?.validate();
                                 },
                               ),
                               dense: true,
@@ -757,21 +800,21 @@ class _ResultPageController extends MyState<ResultPage> {
                         child: Text("ตกลง",
                             style: TextStyle(
                                 color: Color.fromARGB(255, 31, 150, 205))),
-                        onPressed: () async {
-                          if (_shareSelected.length > 0) {
-                            // print(
-                            //     "_shareSelected[0].name${_shareSelected[0].name}");
-                            // print(
-                            //     "_shareSelected[0].name${_shareSelected[0].id}");
-                            final status = await _saveLog();
+                        onPressed: _shareSelected.isEmpty
+                            ? null
+                            : () async {
+                                // print(
+                                //     "_shareSelected[0].name${_shareSelected[0].name}");
+                                // print(
+                                //     "_shareSelected[0].name${_shareSelected[0].id}");
+                                final status = await _saveLog();
 
-                            if (status && !Platform.isWindows) {
-                              _handleClickShareButton();
-                            }
+                                if (status && !Platform.isWindows) {
+                                  _handleClickShareButton();
+                                }
 
-                            Navigator.pop(context, false);
-                          }
-                        },
+                                Navigator.pop(context, false);
+                              },
                       ),
                     ],
                   ),
@@ -1067,7 +1110,7 @@ class _ResultPageController extends MyState<ResultPage> {
     try {
       String uuid;
       try {
-        var fileBytes = await File(_fileEncryptPath).readAsBytes();
+        var fileBytes = await File(_originalInputPath).readAsBytes();
         uuid = utf8
             .decode(fileBytes.sublist(
               (fileBytes.length - Navec.headerUUIDFieldLength),
@@ -1078,7 +1121,7 @@ class _ResultPageController extends MyState<ResultPage> {
       if (((_type == 'encryption') || (_type == 'watermark'))) {
         var email = await MyPrefs.getEmail();
         var secret = await MyPrefs.getSecret();
-        String fileName = '${p.basename(_fileEncryptPath)}';
+        String fileName = '${p.basename(_originalInputPath)}';
         List<int> shareUserId = [];
         _shareSelected.forEach((User user) => shareUserId.add(user.id));
 
@@ -1104,11 +1147,11 @@ class _ResultPageController extends MyState<ResultPage> {
 
   _handlePrintingButton() async {
     final doc = pw.Document();
-    String extension = p.extension(_filePath).substring(1).toLowerCase();
+    String extension = p.extension(_processedFilePath).substring(1).toLowerCase();
 
     if (_isType(Constants.imageFileTypeList, extension)) {
       final image = pw.MemoryImage(
-        File(_filePath).readAsBytesSync(),
+        File(_processedFilePath).readAsBytesSync(),
       );
 
       doc.addPage(pw.Page(
@@ -1120,11 +1163,11 @@ class _ResultPageController extends MyState<ResultPage> {
       await Printing.layoutPdf(
           onLayout: (PdfPageFormat format) async => await doc.save());
     } else if (_isType(Constants.documentFileTypeList, extension)) {
-      final pdf = File(_filePath).readAsBytesSync();
+      final pdf = File(_processedFilePath).readAsBytesSync();
       await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
     } else if (extension.toLowerCase() == 'zip') {
       String uniqueTempDirPath = (await FileUtil.createUniqueTempDir()).path;
-      File(_filePath).copySync('$uniqueTempDirPath/images.zip');
+      File(_processedFilePath).copySync('$uniqueTempDirPath/images.zip');
       FileUtil.unzip(dirPath: uniqueTempDirPath, filename: 'images.zip');
 
       var filePathList =
@@ -1164,5 +1207,43 @@ class _ResultPageController extends MyState<ResultPage> {
             .where((fileType) => fileType.fileExtension == fileExtension)
             .length >
         0;
+  }
+}
+
+typedef _SignInOperation = Future<bool> Function();
+typedef _StatusUpdater = void Function(bool status);
+typedef _WorkflowStep = Future<dynamic> Function();
+typedef _FailureHandler = Future<dynamic> Function(Object error);
+
+Future<bool> runCloudSignInWorkflow({
+  _SignInOperation signIn,
+  _StatusUpdater updateSaveStatus,
+  _WorkflowStep onSuccess,
+  _FailureHandler onFailure,
+}) async {
+  assert(signIn != null);
+  assert(updateSaveStatus != null);
+
+  try {
+    final signInSuccess = await signIn();
+    if (signInSuccess == true) {
+      updateSaveStatus(true);
+      if (onSuccess != null) {
+        await onSuccess();
+      }
+      return true;
+    } else {
+      updateSaveStatus(false);
+      if (onFailure != null) {
+        await onFailure(null);
+      }
+      return false;
+    }
+  } catch (error) {
+    updateSaveStatus(false);
+    if (onFailure != null) {
+      await onFailure(error);
+    }
+    return false;
   }
 }

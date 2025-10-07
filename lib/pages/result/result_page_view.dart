@@ -6,13 +6,16 @@ class _ResultPageView extends WidgetView<ResultPage, _ResultPageController> {
   @override
   Widget build(BuildContext context) {
     print("state._isEncFile ${state._isEncFile}");
+    final isWindows = Platform.isWindows;
+    final isEncryptedFile = state._isEncFile == true;
+
     List<Map<String, dynamic>> buttonDataList = [
       {
         'label': 'บันทึก',
         'icon': Icon(Icons.save, size: 18.0),
         'onClick': state._handleClickSaveButton,
       },
-      if (state._isEncFile == true && Platform.isWindows == false)
+      if (!isEncryptedFile)
         {
           'label': 'เปิด',
           'icon': Icon(Icons.article_outlined, size: 18.0),
@@ -22,21 +25,24 @@ class _ResultPageView extends WidgetView<ResultPage, _ResultPageController> {
         {
           'label': 'อนุญาต',
           'icon': Icon(Icons.contacts, size: 18.0),
-          'onClick': state._pickEmailShare
+          'onClick': state._pickEmailShare,
         },
-      if (state._isEncFile == true && Platform.isWindows == true)
-        {
-          'label': 'เปิด',
-          'icon': Icon(Icons.article_outlined, size: 18.0),
-          'onClick': state._handleClickOpenButton,
-        }
-      else
-        {
-          'label': 'แชร์',
-          'icon': Icon(Icons.share, size: 18.0),
-          'onClick': state._handleClickShareButton,
-        },
-      if (state._isEncFile == true)
+      {
+        'label': isWindows
+            ? (isEncryptedFile ? 'เปิด' : 'แชร์')
+            : 'แชร์',
+        'icon': isWindows
+            ? (isEncryptedFile
+                ? Icon(Icons.article_outlined, size: 18.0)
+                : Icon(Icons.share, size: 18.0))
+            : Icon(Icons.share, size: 18.0),
+        'onClick': isWindows
+            ? (isEncryptedFile
+                ? state._handleClickOpenButton
+                : state._handleClickShareButton)
+            : state._handleClickShareButton,
+      },
+      if (isEncryptedFile)
         {
           'label': 'เข้ารหัส',
           'icon': Icon(Icons.enhanced_encryption_outlined, size: 18.0),
@@ -105,7 +111,7 @@ class _ResultPageView extends WidgetView<ResultPage, _ResultPageController> {
                   style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: !Platform.isWindows ? 16.0 : 8.0),
-                FileDetails(filePath: state._filePath),
+                FileDetails(filePath: state._processedFilePath),
                 SizedBox(height: !Platform.isWindows ? 32.0 : 16.0),
                 Column(
                   children: buttonDataList
