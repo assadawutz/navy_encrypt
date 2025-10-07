@@ -5,6 +5,7 @@ import 'dart:io' show Directory, File, FileSystemEntity, Platform;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -632,12 +633,19 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _pickMediaFile(
-      BuildContext context, Function pickMethod, ImageSource source) async {
+  _pickMediaFile(BuildContext context,
+      Future<XFile> Function({ImageSource source}) pickMethod,
+      ImageSource source) async {
     isLoading = true;
     final XFile selectedFile = await pickMethod(
       source: source,
     );
+
+    if (selectedFile == null) {
+      isLoading = false;
+      return;
+    }
+
     var size = await File(selectedFile.path).length();
     if (size >= 20000000) {
       isLoading = false;
@@ -664,6 +672,15 @@ class HomePageController extends MyState<HomePage> {
         isLoading = false;
       }
     }
+  }
+
+  @visibleForTesting
+  Future<void> pickMediaFileForTest(
+    BuildContext context,
+    Future<XFile> Function({ImageSource source}) pickMethod,
+    ImageSource source,
+  ) async {
+    await _pickMediaFile(context, pickMethod, source);
   }
 
   Future<PackageInfo> _getPackageInfo() async {
