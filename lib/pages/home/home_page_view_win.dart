@@ -9,6 +9,7 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
     final widthThreshold = 900;
     final width = screenWidth(context);
     final height = screenHeight(context);
+    final menuActions = state.menuActions;
 
     return Scaffold(
       body: HeaderScaffold(
@@ -78,13 +79,11 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
                           padding: const EdgeInsets.symmetric(vertical: 32.0),
                           child: Row(
                             children: [
-                              for (var item in state._menuData)
+                              for (var action in menuActions)
                                 MenuItem(
-                                  text: item['text'],
-                                  image: item['image'],
-                                  onClick: () {
-                                    item['onClick'](context);
-                                  },
+                                  text: action.label,
+                                  image: action.assetPath,
+                                  onClick: () => action.onTap(context),
                                   size: width > 1400 ? 110.0 : null,
                                   borderWidth: width > 1400 ? 5.0 : null,
                                 ),
@@ -94,21 +93,19 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            for (var i = 0; i < state._menuData.length; i += 2)
+                            for (var i = 0; i < menuActions.length; i += 2)
                               Expanded(
                                 child: Row(
                                   children: [
                                     for (var j = i;
                                         (j < i + 2) &&
-                                            (j < state._menuData.length);
+                                            (j < menuActions.length);
                                         j++)
                                       MenuItem(
-                                        text: state._menuData[j]['text'],
-                                        image: state._menuData[j]['image'],
-                                        onClick: () {
-                                          state._menuData[j]
-                                              ['onClick'](context);
-                                        },
+                                        text: menuActions[j].label,
+                                        image: menuActions[j].assetPath,
+                                        onClick: () =>
+                                            menuActions[j].onTap(context),
                                         size: width > widthThreshold ||
                                                 height > heightThreshold
                                             ? null
@@ -126,9 +123,13 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
                   builder: (BuildContext context,
                       AsyncSnapshot<PackageInfo> snapshot) {
                     if (snapshot.hasData) {
-                      var packageInfo = snapshot.data;
+                      final versionLabel =
+                          state.buildVersionLabel(snapshot.data);
+                      if (versionLabel.isEmpty) {
+                        return SizedBox.shrink();
+                      }
                       return Text(
-                        'เวอร์ชัน 3.0.1+4',
+                        versionLabel,
                         style:
                             TextStyle(fontSize: 24.0, color: Color(0xFF808080)),
                       );

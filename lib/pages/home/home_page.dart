@@ -1,5 +1,6 @@
 library home_page;
 
+import 'dart:async' show FutureOr;
 import 'dart:io' show Directory, File, FileSystemEntity, FileSystemException, Platform;
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -50,10 +51,19 @@ class HomePageController extends MyState<HomePage> {
   static const int maxSelectableFileSizeBytes = 20 * 1024 * 1024;
 
   final ImagePicker _picker = ImagePicker();
-  List<Map<String, dynamic>> _menuData;
+  List<_HomeMenuAction> _menuActions;
   String filePath;
 
   HomePageController(this.filePath);
+
+  List<_HomeMenuAction> get menuActions {
+    if (_menuActions == null) {
+      return const <_HomeMenuAction>[];
+    }
+    return _menuActions
+        .where((action) => action.isVisible)
+        .toList(growable: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,46 +120,49 @@ class HomePageController extends MyState<HomePage> {
   }
 
   void _initMenuData() {
-    _menuData = [
-      {
-        'image': 'assets/images/ic_document.png',
-        'text': Platform.isWindows || Platform.isMacOS
-            ? 'ไฟล์ในเครื่อง'
-            : 'ไฟล์ในเครื่อง',
-        'onClick': _pickFromFileSystem,
-      },
-      if (!Platform.isWindows || Platform.isMacOS)
-        {
-          'image': 'assets/images/ic_camera.png',
-          'text': 'กล้อง',
-          'onClick': _pickFromCamera,
-        },
-      {
-        'image': 'assets/images/ic_gallery.png',
-        'text': Platform.isWindows || Platform.isMacOS ? 'รูปภาพ' : 'คลังภาพ',
-        'onClick': _pickFromGallery,
-      },
-      {
-        'image': 'assets/images/ic_google_drive.png',
-        'text': 'Google Drive',
-        'onClick': _doPickFromGoogleDrive,
-      },
-      {
-        'image': 'assets/images/ic_onedrive_new.png',
-        'text': 'OneDrive',
-        'onClick': _pickFromOneDrive,
-      },
-      {
-        'image': 'assets/images/ic_history.png',
-        'text': 'ประวัติ',
-        'onClick': (BuildContext context) {
-          Navigator.pushNamed(
-            context,
-            HistoryPage.routeName,
-          );
-        },
-      },
+    final bool isDesktopPlatform = Platform.isWindows || Platform.isMacOS;
+    final bool isMobilePlatform = Platform.isAndroid || Platform.isIOS;
+
+    _menuActions = <_HomeMenuAction>[
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_document.png',
+        labelBuilder: () => 'ไฟล์ในเครื่อง',
+        onTap: _pickFromFileSystem,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_camera.png',
+        labelBuilder: () => 'กล้อง',
+        onTap: _pickFromCamera,
+        isVisible: () => isMobilePlatform,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_gallery.png',
+        labelBuilder: () => isDesktopPlatform ? 'รูปภาพ' : 'คลังภาพ',
+        onTap: _pickFromGallery,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_google_drive.png',
+        labelBuilder: () => 'Google Drive',
+        onTap: _doPickFromGoogleDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_onedrive_new.png',
+        labelBuilder: () => 'OneDrive',
+        onTap: _pickFromOneDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_history.png',
+        labelBuilder: () => 'ประวัติ',
+        onTap: _openHistory,
+      ),
     ];
+  }
+
+  void _openHistory(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      HistoryPage.routeName,
+    );
   }
 
   _pickFromFileSystem(BuildContext context) async {
@@ -792,15 +805,6 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
-  @visibleForTesting
-  Future<void> pickMediaFileForTest(
-    BuildContext context,
-    Future<XFile> Function({ImageSource source}) pickMethod,
-    ImageSource source,
-  ) async {
-    await _pickMediaFile(context, pickMethod, source);
-  }
-
   Future<PackageInfo> _getPackageInfo() async {
     return await PackageInfo.fromPlatform();
 
@@ -809,4 +813,43 @@ class HomePageController extends MyState<HomePage> {
     String version = packageInfo.version;
     String buildNumber = packageInfo.buildNumber;*/
   }
+
+  String buildVersionLabel(PackageInfo packageInfo) {
+    if (packageInfo == null) {
+      return '';
+    }
+
+    final String version = packageInfo.version?.trim();
+    final String buildNumber = packageInfo.buildNumber?.trim();
+
+    if (version == null || version.isEmpty) {
+      return '';
+    }
+
+    if (buildNumber == null || buildNumber.isEmpty) {
+      return 'เวอร์ชัน $version';
+    }
+
+    return 'เวอร์ชัน $version+$buildNumber';
+  }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
 }
