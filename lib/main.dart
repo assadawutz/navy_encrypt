@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:navy_encrypt/etc/constants.dart';
 import 'package:navy_encrypt/etc/share_intent_handler.dart';
+import 'package:navy_encrypt/common/firebase_bootstrap.dart';
 import 'package:navy_encrypt/models/loading_message.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_picker_page.dart';
 import 'package:navy_encrypt/pages/decryption/decryption_page.dart';
@@ -25,7 +24,7 @@ import 'package:window_size/window_size.dart';
 //https://flutter.dev/docs/get-started/flutter-for/android-devs#how-do-i-handle-incoming-intents-from-external-applications-in-flutter
 //https://github.com/flutter/flutter/issues/32986
 
-String filePathFromCli;
+String filePathFromCli = '';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -40,18 +39,7 @@ Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // get command-line arg in desktop app
-  // if (Platform.isAndroid == true || Platform.isIOS == true) {
-  if (Platform.isWindows) {
-  } else {
-    // WidgetsFlutterBinding.ensureInitialized();
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
-  }
-
-  // }
-
-// Ideal time to initialize
-  await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  await configureFirebase();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
