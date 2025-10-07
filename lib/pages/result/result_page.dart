@@ -467,7 +467,7 @@ class _ResultPageController extends MyState<ResultPage> {
       showOkDialog(
         context,
         'ผิดพลาด',
-        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
+        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
       );
     }
     isLoading = false;
