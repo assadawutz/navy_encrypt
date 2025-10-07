@@ -657,14 +657,21 @@ class _ResultPageController extends MyState<ResultPage> {
                       fontFamily: 'DBHeavent',
                     ),
                     onConfirm: (results) async {
-                      print("getEMail =${results[0].email}");
+                      if (results == null || results.isEmpty) {
+                        setState(() {
+                          _shareSelected = [];
+                        });
+                        _multiSelectKey.currentState?.validate();
+                        return;
+                      }
+                      print("getEMail =${results.first.email}");
                       // print("getEMail =${results[1].email}");
                       setState(() {
                         _shareSelected = results;
                       });
                       // print("_shareSelected =${_shareSelected}");
 
-                      _multiSelectKey.currentState.validate();
+                      _multiSelectKey.currentState?.validate();
 
                       // List<int> shareUserId = [];
                       // _shareSelected
@@ -732,7 +739,7 @@ class _ResultPageController extends MyState<ResultPage> {
                                     _shareSelected
                                         .remove(_shareSelected[index]);
                                   });
-                                  _multiSelectKey.currentState.validate();
+                                  _multiSelectKey.currentState?.validate();
                                 },
                               ),
                               dense: true,
@@ -769,21 +776,21 @@ class _ResultPageController extends MyState<ResultPage> {
                         child: Text("ตกลง",
                             style: TextStyle(
                                 color: Color.fromARGB(255, 31, 150, 205))),
-                        onPressed: () async {
-                          if (_shareSelected.length > 0) {
-                            // print(
-                            //     "_shareSelected[0].name${_shareSelected[0].name}");
-                            // print(
-                            //     "_shareSelected[0].name${_shareSelected[0].id}");
-                            final status = await _saveLog();
+                        onPressed: _shareSelected.isEmpty
+                            ? null
+                            : () async {
+                                // print(
+                                //     "_shareSelected[0].name${_shareSelected[0].name}");
+                                // print(
+                                //     "_shareSelected[0].name${_shareSelected[0].id}");
+                                final status = await _saveLog();
 
-                            if (status && !Platform.isWindows) {
-                              _handleClickShareButton();
-                            }
+                                if (status && !Platform.isWindows) {
+                                  _handleClickShareButton();
+                                }
 
-                            Navigator.pop(context, false);
-                          }
-                        },
+                                Navigator.pop(context, false);
+                              },
                       ),
                     ],
                   ),
