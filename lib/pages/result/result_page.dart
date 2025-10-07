@@ -358,11 +358,26 @@ class _ResultPageController extends MyState<ResultPage> {
           fileName: p.basename(_filePath),
           //type: FileType.image,
         );
+        if (outputFilePath == null) {
+          setState(() {
+            _saveStstus = false;
+          });
+          isLoading = false;
+          return;
+        }
         await _saveFile(outputFilePath, isFullPath: true);
       } else {
         // Pick a directory
         String selectedDirectory = await FilePicker.platform.getDirectoryPath();
         logOneLineWithBorderDouble('SELECTED DIR: $selectedDirectory');
+
+        if (selectedDirectory == null) {
+          setState(() {
+            _saveStstus = false;
+          });
+          isLoading = false;
+          return;
+        }
 
         var status = await Permission.storage.status;
         if (status.isGranted) {
@@ -385,6 +400,13 @@ class _ResultPageController extends MyState<ResultPage> {
   }
 
   Future<void> _saveFile(String selectedPath, {bool isFullPath = false}) async {
+    if (selectedPath == null || selectedPath.isEmpty) {
+      setState(() {
+        _saveStstus = false;
+      });
+      isLoading = false;
+      return;
+    }
     var targetPath =
         isFullPath ? selectedPath : p.join(selectedPath, p.basename(_filePath));
     logOneLineWithBorderSingle('COPYING TO $targetPath');
