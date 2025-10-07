@@ -1,10 +1,11 @@
 library home_page;
 
-import 'dart:io' show Directory, File, FileSystemEntity, Platform;
+import 'dart:io' show Directory, File, FileSystemEntity, FileSystemException, Platform;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_picker_cross/file_picker_cross.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -87,12 +88,12 @@ class HomePageController extends MyState<HomePage> {
 
   // called from main.dart
   void handleIntent(String filePath) {
-    var dotIndex = filePath.lastIndexOf('.');
-    var routeToGo = (dotIndex != -1 &&
-            filePath.substring(dotIndex).toLowerCase() ==
-                '.${Navec.encryptedFileExtension}')
-        ? DecryptionPage.routeName
-        : EncryptionPage.routeName;
+    final normalizedPath = filePath?.trim();
+    if (normalizedPath == null || normalizedPath.isEmpty) {
+      return;
+    }
+
+    final routeToGo = _resolveRouteForFile(normalizedPath);
     Future.delayed(
       Duration.zero,
       () {
@@ -100,7 +101,7 @@ class HomePageController extends MyState<HomePage> {
         Navigator.pushNamed(
           context,
           routeToGo,
-          arguments: filePath,
+          arguments: normalizedPath,
         );
       },
     );
@@ -366,10 +367,7 @@ class HomePageController extends MyState<HomePage> {
       isLoading = true;
 
       if (_checkFileExtension(filePath)) {
-        var routeToGo = EncryptionPage.routeName;
-        if (p.extension(filePath).substring(1) == 'enc') {
-          routeToGo = DecryptionPage.routeName;
-        }
+        final routeToGo = _resolveRouteForFile(filePath);
 
         Navigator.pushNamed(
           context,
@@ -632,38 +630,130 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _pickMediaFile(
-      BuildContext context, Function pickMethod, ImageSource source) async {
+  _pickMediaFile(BuildContext context,
+      Future<XFile> Function({ImageSource source}) pickMethod,
+      ImageSource source) async {
     isLoading = true;
-    final XFile selectedFile = await pickMethod(
-      source: source,
-    );
-    var size = await File(selectedFile.path).length();
-    if (size >= 20000000) {
-      isLoading = false;
 
-      setState(() {
-        isLoading = false;
-
-        showOkDialog(context, 'ผิดพลาด',
-            textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
-      });
-    } else {
-      if (_checkFileExtension(selectedFile.path)) {
-        Future.delayed(Duration(milliseconds: 500), () {
-          isLoading = false;
-
-          Navigator.pushNamed(
-            context,
-            EncryptionPage.routeName,
-            arguments: selectedFile.path,
-          );
-        });
-      } else {
-        // User cancel selecting file OR error
-        isLoading = false;
+    XFile selectedFile;
+    try {
+      selectedFile = await pickMethod(source: source);
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble('Media pick failed: $error\n$stackTrace');
+      if (!mounted) {
+        return;
       }
+      isLoading = false;
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถเลือกไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
+      );
+      return;
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (selectedFile == null) {
+      _stopLoading();
+      return;
+    }
+
+    final selectedFilePath = selectedFile.path.trim();
+    final file = File(selectedFilePath);
+
+    try {
+      final exists = await file.exists();
+      if (!exists) {
+        _stopLoading();
+        if (!mounted) {
+          return;
+        }
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่พบไฟล์ที่เลือก',
+        );
+        return;
+      }
+
+      final size = await file.length();
+      if (size >= 20000000) {
+        _stopLoading();
+        if (!mounted) {
+          return;
+        }
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB",
+        );
+        return;
+      }
+    } on FileSystemException catch (error, stackTrace) {
+      logOneLineWithBorderDouble('Unable to read file: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
+      _stopLoading();
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถอ่านไฟล์ที่เลือกได้',
+      );
+      return;
+    }
+
+    if (!_checkFileExtension(selectedFilePath)) {
+      _stopLoading();
+      return;
+    }
+
+    final routeToGo = _resolveRouteForFile(selectedFilePath);
+
+    _stopLoading();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pushNamed(
+      context,
+      routeToGo,
+      arguments: selectedFilePath,
+    );
+  }
+
+  @visibleForTesting
+  Future<void> pickMediaFileForTest(
+    BuildContext context,
+    Future<XFile> Function({ImageSource source}) pickMethod,
+    ImageSource source,
+  ) async {
+    await _pickMediaFile(context, pickMethod, source);
+  }
+
+  void _stopLoading() {
+    if (!mounted) {
+      return;
+    }
+
+    isLoading = false;
+  }
+
+  String _resolveRouteForFile(String filePath) {
+    if (filePath == null || filePath.isEmpty) {
+      return EncryptionPage.routeName;
+    }
+
+    final normalizedExtension = p.extension(filePath).toLowerCase();
+    if (normalizedExtension ==
+        '.${Navec.encryptedFileExtension.toLowerCase()}') {
+      return DecryptionPage.routeName;
+    }
+    return EncryptionPage.routeName;
   }
 
   Future<PackageInfo> _getPackageInfo() async {
