@@ -209,9 +209,6 @@ class _ResultPageController extends MyState<ResultPage> {
                 height: Constants.LIST_DIALOG_ICON_SIZE,
               ),
               onClick: () {
-                setState(() {
-                  _saveStstus = true;
-                });
                 _saveToGoogleDrive();
                 Navigator.of(context).pop();
               },
@@ -224,9 +221,6 @@ class _ResultPageController extends MyState<ResultPage> {
                 height: Constants.LIST_DIALOG_ICON_SIZE,
               ),
               onClick: () {
-                setState(() {
-                  _saveStstus = true;
-                });
                 _saveToOneDrive();
                 Navigator.of(context).pop();
               },
@@ -447,59 +441,89 @@ class _ResultPageController extends MyState<ResultPage> {
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน Google Drive';
     var googleDrive = GoogleDrive(CloudPickerMode.folder);
-    var signInSuccess = Platform.isWindows
-        ? await googleDrive.signInWithOAuth2()
-        : await googleDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: googleDrive..fileToUpload = File(_processedFilePath),
-          title: 'Google Drive',
-          headerImagePath: 'assets/images/ic_google_drive.png',
-          rootName: 'Drive',
-        ),
-        //arguments: googleDrive..fileToUpload = File(_processedFilePath),
+    try {
+      await runCloudSignInWorkflow(
+        signIn: () => Platform.isWindows
+            ? googleDrive.signInWithOAuth2()
+            : googleDrive.signIn(),
+        updateSaveStatus: _updateSaveStatus,
+        onSuccess: () {
+          return Navigator.pushNamed(
+            context,
+            CloudPickerPage.routeName,
+            arguments: CloudPickerPageArg(
+              cloudDrive: googleDrive..fileToUpload = File(_processedFilePath),
+              title: 'Google Drive',
+              headerImagePath: 'assets/images/ic_google_drive.png',
+              rootName: 'Drive',
+            ),
+          );
+        },
+        onFailure: (error) {
+          var message = 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้';
+          if (error != null) {
+            message += '\n$error';
+          }
+          return showOkDialog(
+            context,
+            'ผิดพลาด',
+            textContent: message,
+          );
+        },
       );
-    } else {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
-      );
+    } finally {
+      isLoading = false;
     }
-    isLoading = false;
   }
 
   _saveToOneDrive() async {
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน OneDrive';
     var oneDrive = OneDrive(CloudPickerMode.folder);
-    var signInSuccess = Platform.isWindows
-        ? await oneDrive.signInWithOAuth2()
-        : await oneDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive..fileToUpload = File(_processedFilePath),
-          title: 'OneDrive',
-          headerImagePath: 'assets/images/ic_onedrive_new.png',
-          rootName: 'Drive',
-        ),
+    try {
+      await runCloudSignInWorkflow(
+        signIn: () => Platform.isWindows
+            ? oneDrive.signInWithOAuth2()
+            : oneDrive.signIn(),
+        updateSaveStatus: _updateSaveStatus,
+        onSuccess: () {
+          return Navigator.pushNamed(
+            context,
+            CloudPickerPage.routeName,
+            arguments: CloudPickerPageArg(
+              cloudDrive: oneDrive..fileToUpload = File(_processedFilePath),
+              title: 'OneDrive',
+              headerImagePath: 'assets/images/ic_onedrive_new.png',
+              rootName: 'Drive',
+            ),
+          );
+        },
+        onFailure: (error) {
+          var message = 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้';
+          if (error != null) {
+            message += '\n$error';
+          }
+          return showOkDialog(
+            context,
+            'ผิดพลาด',
+            textContent: message,
+          );
+        },
       );
-    } else {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
-      );
+    } finally {
+      isLoading = false;
     }
-    isLoading = false;
+  }
+
+  void _updateSaveStatus(bool value) {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _saveStstus = value;
+    });
   }
 
   _handleClickShareButton() async {
@@ -1183,5 +1207,43 @@ class _ResultPageController extends MyState<ResultPage> {
             .where((fileType) => fileType.fileExtension == fileExtension)
             .length >
         0;
+  }
+}
+
+typedef _SignInOperation = Future<bool> Function();
+typedef _StatusUpdater = void Function(bool status);
+typedef _WorkflowStep = Future<dynamic> Function();
+typedef _FailureHandler = Future<dynamic> Function(Object error);
+
+Future<bool> runCloudSignInWorkflow({
+  _SignInOperation signIn,
+  _StatusUpdater updateSaveStatus,
+  _WorkflowStep onSuccess,
+  _FailureHandler onFailure,
+}) async {
+  assert(signIn != null);
+  assert(updateSaveStatus != null);
+
+  try {
+    final signInSuccess = await signIn();
+    if (signInSuccess == true) {
+      updateSaveStatus(true);
+      if (onSuccess != null) {
+        await onSuccess();
+      }
+      return true;
+    } else {
+      updateSaveStatus(false);
+      if (onFailure != null) {
+        await onFailure(null);
+      }
+      return false;
+    }
+  } catch (error) {
+    updateSaveStatus(false);
+    if (onFailure != null) {
+      await onFailure(error);
+    }
+    return false;
   }
 }
