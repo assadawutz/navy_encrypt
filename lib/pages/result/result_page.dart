@@ -51,10 +51,10 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageController extends MyState<ResultPage> {
-  String _filePath;
+  String _processedFilePath;
   String _message;
   bool _isEncFile;
-  String _fileEncryptPath;
+  String _originalInputPath;
   List<User> _shareSelected;
   String _signatureCode;
   String _type;
@@ -73,28 +73,39 @@ class _ResultPageController extends MyState<ResultPage> {
   Widget build(BuildContext context) {
     // print(
     //     "_multiSelectKey.currentState.validate()${_multiSelectKey.currentState.value()}");
-    var arguments =
+    final arguments =
         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-    _filePath = arguments['filePath'] as String;
+    _processedFilePath = (arguments['processedFilePath'] ??
+            arguments['filePath'])
+        as String;
     _message = arguments['message'] as String;
-    _fileEncryptPath =
-        arguments['fileEncryptPath'] ?? arguments['filePath'] as String;
+    _originalInputPath = (arguments['originalInputPath'] ??
+            arguments['fileEncryptPath'] ??
+            _processedFilePath) as String;
 
-    assert(_filePath.isNotEmpty);
+    assert(_processedFilePath?.isNotEmpty ?? false);
 
-    _isEncFile = arguments['isEncryption'] as bool;
+    final isEncryptedArgument = arguments['isEncryptedFile'];
+    if (isEncryptedArgument is bool) {
+      _isEncFile = isEncryptedArgument;
+    } else if (arguments['isEncryption'] is bool) {
+      _isEncFile = !(arguments['isEncryption'] as bool);
+    } else {
+      final extension = p.extension(_processedFilePath).toLowerCase();
+      _isEncFile = extension == '.${Navec.encryptedFileExtension}';
+    }
     _signatureCode = arguments['signatureCode'] as String;
     _type = arguments['type'] as String;
 
-    //p.extension(_filePath).substring(1) == Navec.encryptedFileExtension;
+    //p.extension(_processedFilePath).substring(1) == Navec.encryptedFileExtension;
 
-    logOneLineWithBorderSingle('File path: $_filePath');
+    logOneLineWithBorderSingle('File path: $_processedFilePath');
 
     return _ResultPageView(this);
   }
 
   bool _isImageFile() {
-    var extension = p.extension(_filePath);
+    var extension = p.extension(_processedFilePath);
     if (extension.isEmpty ?? true) return false;
     return Constants.imageFileTypeList
         .where((type) =>
@@ -107,7 +118,7 @@ class _ResultPageController extends MyState<ResultPage> {
     Navigator.pushReplacementNamed(
       context,
       EncryptionPage.routeName,
-      arguments: _filePath,
+      arguments: _processedFilePath,
     );
   }
 
@@ -237,12 +248,12 @@ class _ResultPageController extends MyState<ResultPage> {
         context,
         CloudPickerPage.routeName,
         arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'รูปภาพ',
           headerImagePath: 'assets/images/ic_gallery.png',
           rootName: 'Pictures',
         ),
-        //arguments: localDrive..fileToUpload = File(_filePath),
+        //arguments: localDrive..fileToUpload = File(_processedFilePath),
       );
       return;
     }
@@ -267,7 +278,7 @@ class _ResultPageController extends MyState<ResultPage> {
   }
 
   _doSaveToGallery() async {
-    var file = File(_filePath);
+    var file = File(_processedFilePath);
     var result = await ImageGallerySaver.saveImage(
       await file.readAsBytes(),
       quality: 100,
@@ -293,10 +304,10 @@ class _ResultPageController extends MyState<ResultPage> {
   //
   //   encoder.create(appDocDirectory.path + "/" + 'jay2.zip');
   //
-  //   encoder.addFile(File(_filePath));
+  //   encoder.addFile(File(_processedFilePath));
   //
   //   encoder.close();
-  //   final bytes = File(_filePath).readAsBytesSync();
+  //   final bytes = File(_processedFilePath).readAsBytesSync();
   //
   //   Navigator.pushNamed(
   //     context,
@@ -306,7 +317,7 @@ class _ResultPageController extends MyState<ResultPage> {
   //         title: 'โฟลเดอร์ของแอป',
   //         headerImagePath: 'assets/images/ic_document.png',
   //         rootName: 'App\'s Folder'),
-  //     //arguments: localDrive..fileToUpload = File(_filePath),
+  //     //arguments: localDrive..fileToUpload = File(_processedFilePath),
   //   );
   // }
 
@@ -319,11 +330,11 @@ class _ResultPageController extends MyState<ResultPage> {
       context,
       CloudPickerPage.routeName,
       arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'โฟลเดอร์ของแอป',
           headerImagePath: 'assets/images/ic_document.png',
           rootName: 'App\'s Folder'),
-      //arguments: localDrive..fileToUpload = File(_filePath),
+      //arguments: localDrive..fileToUpload = File(_processedFilePath),
     );
   }
 
@@ -336,11 +347,11 @@ class _ResultPageController extends MyState<ResultPage> {
       context,
       CloudPickerPage.routeName,
       arguments: CloudPickerPageArg(
-          cloudDrive: localDrive..fileToUpload = File(_filePath),
+          cloudDrive: localDrive..fileToUpload = File(_processedFilePath),
           title: 'iCloud',
           headerImagePath: 'assets/images/ic_icloud.png',
           rootName: 'iCloud'),
-      //arguments: localDrive..fileToUpload = File(_filePath),
+      //arguments: localDrive..fileToUpload = File(_processedFilePath),
     );
   }
 
@@ -355,7 +366,7 @@ class _ResultPageController extends MyState<ResultPage> {
         // Save-file / save-as dialog - ใช้ได้เฉพาะ desktop
         String outputFilePath = await FilePicker.platform.saveFile(
           dialogTitle: 'เลือกโฟลเดอร์และชื่อไฟล์ที่จะบันทึก',
-          fileName: p.basename(_filePath),
+          fileName: p.basename(_processedFilePath),
           //type: FileType.image,
         );
         await _saveFile(outputFilePath, isFullPath: true);
@@ -386,14 +397,14 @@ class _ResultPageController extends MyState<ResultPage> {
 
   Future<void> _saveFile(String selectedPath, {bool isFullPath = false}) async {
     var targetPath =
-        isFullPath ? selectedPath : p.join(selectedPath, p.basename(_filePath));
+        isFullPath ? selectedPath : p.join(selectedPath, p.basename(_processedFilePath));
     logOneLineWithBorderSingle('COPYING TO $targetPath');
-    print('COPYING TO ${p.basename(_filePath)}');
+    print('COPYING TO ${p.basename(_processedFilePath)}');
     try {
       isLoading = true;
       loadingMessage = 'กำลังบันทึกไฟล์';
 
-      await File(_filePath).copy(targetPath);
+      await File(_processedFilePath).copy(targetPath);
       showOkDialog(
         context,
         'สำเร็จ',
@@ -423,12 +434,12 @@ class _ResultPageController extends MyState<ResultPage> {
         context,
         CloudPickerPage.routeName,
         arguments: CloudPickerPageArg(
-          cloudDrive: googleDrive..fileToUpload = File(_filePath),
+          cloudDrive: googleDrive..fileToUpload = File(_processedFilePath),
           title: 'Google Drive',
           headerImagePath: 'assets/images/ic_google_drive.png',
           rootName: 'Drive',
         ),
-        //arguments: googleDrive..fileToUpload = File(_filePath),
+        //arguments: googleDrive..fileToUpload = File(_processedFilePath),
       );
     } else {
       showOkDialog(
@@ -453,7 +464,7 @@ class _ResultPageController extends MyState<ResultPage> {
         context,
         CloudPickerPage.routeName,
         arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive..fileToUpload = File(_filePath),
+          cloudDrive: oneDrive..fileToUpload = File(_processedFilePath),
           title: 'OneDrive',
           headerImagePath: 'assets/images/ic_onedrive_new.png',
           rootName: 'Drive',
@@ -470,9 +481,10 @@ class _ResultPageController extends MyState<ResultPage> {
   }
 
   _handleClickShareButton() async {
+    final pathToShare = _processedFilePath;
     if (await isIpad()) {
       Share.shareFiles(
-        _isEncFile == false ? [_filePath] : [_fileEncryptPath],
+        [pathToShare],
         sharePositionOrigin: Rect.fromLTWH(
           0,
           0,
@@ -482,13 +494,13 @@ class _ResultPageController extends MyState<ResultPage> {
       );
     } else {
       Share.shareFiles(
-        _isEncFile == false ? [_filePath] : [_fileEncryptPath],
+        [pathToShare],
       );
     }
   }
 
   _handleClickOpenButton() {
-    OpenFile.open(_filePath).then((result) {
+    OpenFile.open(_processedFilePath).then((result) {
       if (result.type == ResultType.noAppToOpen) {
         showOkDialog(
           context,
@@ -1045,7 +1057,7 @@ class _ResultPageController extends MyState<ResultPage> {
     try {
       String uuid;
       try {
-        var fileBytes = await File(_fileEncryptPath).readAsBytes();
+        var fileBytes = await File(_originalInputPath).readAsBytes();
         uuid = utf8
             .decode(fileBytes.sublist(
               (fileBytes.length - Navec.headerUUIDFieldLength),
@@ -1056,7 +1068,7 @@ class _ResultPageController extends MyState<ResultPage> {
       if (((_type == 'encryption') || (_type == 'watermark'))) {
         var email = await MyPrefs.getEmail();
         var secret = await MyPrefs.getSecret();
-        String fileName = '${p.basename(_fileEncryptPath)}';
+        String fileName = '${p.basename(_originalInputPath)}';
         List<int> shareUserId = [];
         _shareSelected.forEach((User user) => shareUserId.add(user.id));
 
@@ -1082,11 +1094,11 @@ class _ResultPageController extends MyState<ResultPage> {
 
   _handlePrintingButton() async {
     final doc = pw.Document();
-    String extension = p.extension(_filePath).substring(1).toLowerCase();
+    String extension = p.extension(_processedFilePath).substring(1).toLowerCase();
 
     if (_isType(Constants.imageFileTypeList, extension)) {
       final image = pw.MemoryImage(
-        File(_filePath).readAsBytesSync(),
+        File(_processedFilePath).readAsBytesSync(),
       );
 
       doc.addPage(pw.Page(
@@ -1098,11 +1110,11 @@ class _ResultPageController extends MyState<ResultPage> {
       await Printing.layoutPdf(
           onLayout: (PdfPageFormat format) async => await doc.save());
     } else if (_isType(Constants.documentFileTypeList, extension)) {
-      final pdf = File(_filePath).readAsBytesSync();
+      final pdf = File(_processedFilePath).readAsBytesSync();
       await Printing.layoutPdf(onLayout: (_) => pdf.buffer.asUint8List());
     } else if (extension.toLowerCase() == 'zip') {
       String uniqueTempDirPath = (await FileUtil.createUniqueTempDir()).path;
-      File(_filePath).copySync('$uniqueTempDirPath/images.zip');
+      File(_processedFilePath).copySync('$uniqueTempDirPath/images.zip');
       FileUtil.unzip(dirPath: uniqueTempDirPath, filename: 'images.zip');
 
       var filePathList =
