@@ -47,6 +47,8 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageController extends MyState<HomePage> {
+  static const int maxSelectableFileSizeBytes = 20 * 1024 * 1024;
+
   final ImagePicker _picker = ImagePicker();
   List<Map<String, dynamic>> _menuData;
   String filePath;
@@ -339,45 +341,49 @@ class HomePageController extends MyState<HomePage> {
           fileExtension: Platform.isWindows || Platform.isMacOS
               ? Constants.selectableFileTypeList
                   .map((fileType) => fileType.fileExtension)
-                  .fold('',
-                      (previousValue, element) => '$previousValue, $element')
-                  .substring(1)
-                  .trim()
+                  .join(', ')
               : '',
         );
       }
-    } on FileSelectionCanceledError catch (e) {
-      // debugPrint('User ยกเลิกการเลือกไฟล์: ${e.toString()}');
-      showOkDialog(context, 'User ยกเลิกการเลือกไฟล์:',
-          textContent: e.toString());
-    } catch (e) {
-    } finally {
-      isLoading = false;
-    }
-
-    var size = await pickedFile.length;
-
-    if (size >= 20000000) {
-      setState(() {
-        showOkDialog(context, 'ผิดพลาด',
-            textContent: "ขนาดไฟล์ต้องไม่เกิน 20 MB");
-      });
-    } else {
-      var filePath = pickedFile.path;
-      isLoading = true;
-
-      if (_checkFileExtension(filePath)) {
-        final routeToGo = _resolveRouteForFile(filePath);
-
-        Navigator.pushNamed(
-          context,
-          routeToGo,
-          arguments: filePath,
-        );
+    } on FileSelectionCanceledError {
+      _stopLoading();
+      return;
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'System picker failed: $error\n$stackTrace');
+      if (!mounted) {
+        return;
       }
-
-      isLoading = false;
+      _stopLoading();
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถเลือกไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
+      );
+      return;
     }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (pickedFile == null) {
+      _stopLoading();
+      return;
+    }
+
+    final pickedFilePath = pickedFile.path?.trim();
+    if (pickedFilePath == null || pickedFilePath.isEmpty) {
+      _stopLoading();
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถอ่านไฟล์ที่เลือกได้',
+      );
+      return;
+    }
+
+    await _processPickedFile(pickedFilePath);
   }
 
   _pickFromCamera(BuildContext context) async {
@@ -661,8 +667,45 @@ class HomePageController extends MyState<HomePage> {
       return;
     }
 
-    final selectedFilePath = selectedFile.path.trim();
-    final file = File(selectedFilePath);
+    String selectedFilePath;
+    try {
+      selectedFilePath = selectedFile.path?.trim();
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble('Unable to read picked file path: '
+          '$error\n$stackTrace');
+      selectedFilePath = null;
+    }
+
+    if (selectedFilePath == null || selectedFilePath.isEmpty) {
+      _stopLoading();
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถอ่านไฟล์ที่เลือกได้',
+      );
+      return;
+    }
+
+    await _processPickedFile(selectedFilePath);
+  }
+
+  @visibleForTesting
+  Future<void> pickMediaFileForTest(
+    BuildContext context,
+    Future<XFile> Function({ImageSource source}) pickMethod,
+    ImageSource source,
+  ) async {
+    await _pickMediaFile(context, pickMethod, source);
+  }
+
+  Future<void> _processPickedFile(String filePath) async {
+    final normalizedPath = filePath?.trim();
+    if (normalizedPath == null || normalizedPath.isEmpty) {
+      _stopLoading();
+      return;
+    }
+
+    final file = File(normalizedPath);
 
     try {
       final exists = await file.exists();
@@ -680,7 +723,7 @@ class HomePageController extends MyState<HomePage> {
       }
 
       final size = await file.length();
-      if (size >= 20000000) {
+      if (size >= maxSelectableFileSizeBytes) {
         _stopLoading();
         if (!mounted) {
           return;
@@ -706,12 +749,12 @@ class HomePageController extends MyState<HomePage> {
       return;
     }
 
-    if (!_checkFileExtension(selectedFilePath)) {
+    if (!_checkFileExtension(normalizedPath)) {
       _stopLoading();
       return;
     }
 
-    final routeToGo = _resolveRouteForFile(selectedFilePath);
+    final routeToGo = _resolveRouteForFile(normalizedPath);
 
     _stopLoading();
 
@@ -722,17 +765,8 @@ class HomePageController extends MyState<HomePage> {
     Navigator.pushNamed(
       context,
       routeToGo,
-      arguments: selectedFilePath,
+      arguments: normalizedPath,
     );
-  }
-
-  @visibleForTesting
-  Future<void> pickMediaFileForTest(
-    BuildContext context,
-    Future<XFile> Function({ImageSource source}) pickMethod,
-    ImageSource source,
-  ) async {
-    await _pickMediaFile(context, pickMethod, source);
   }
 
   void _stopLoading() {

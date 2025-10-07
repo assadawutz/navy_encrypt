@@ -154,4 +154,49 @@ void main() {
     expect(observer.lastArguments, encryptedFile.path);
     expect(state.isLoading, isFalse);
   });
+
+  testWidgets('non-existent file shows error and cancels navigation',
+      (tester) async {
+    final observer = _TestNavigatorObserver();
+    final state = await _pumpHomePage(tester, observer);
+
+    await state.pickMediaFileForTest(
+      state.context,
+      ({ImageSource source}) async => XFile('/path/does/not/exist'),
+      ImageSource.gallery,
+    );
+
+    await tester.pump();
+    expect(state.isLoading, isFalse);
+    expect(observer.pushCount, 0);
+
+    await tester.pumpAndSettle();
+    expect(find.text('ไม่พบไฟล์ที่เลือก'), findsOneWidget);
+  });
+
+  testWidgets('oversized file shows error and stays on home', (tester) async {
+    final observer = _TestNavigatorObserver();
+    final state = await _pumpHomePage(tester, observer);
+
+    final tempDir = await Directory.systemTemp.createTemp('home_page_test');
+    addTearDown(() => tempDir.delete(recursive: true));
+    final largeFile = File('${tempDir.path}/too_large.jpg');
+    final randomFile = await largeFile.open(mode: FileMode.write);
+    await randomFile.setPosition(HomePageController.maxSelectableFileSizeBytes);
+    await randomFile.writeByte(0);
+    await randomFile.close();
+
+    await state.pickMediaFileForTest(
+      state.context,
+      ({ImageSource source}) async => XFile(largeFile.path),
+      ImageSource.gallery,
+    );
+
+    await tester.pump();
+    expect(state.isLoading, isFalse);
+    expect(observer.pushCount, 0);
+
+    await tester.pumpAndSettle();
+    expect(find.text('ขนาดไฟล์ต้องไม่เกิน 20 MB'), findsOneWidget);
+  });
 }
