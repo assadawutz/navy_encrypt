@@ -640,15 +640,17 @@ class HomePageController extends MyState<HomePage> {
       Future<XFile> Function({ImageSource source}) pickMethod,
       ImageSource source) async {
     isLoading = true;
+    final XFile selectedFile = await pickMethod(
+      source: source,
+    );
 
-    XFile selectedFile;
-    try {
-      selectedFile = await pickMethod(source: source);
-    } catch (error, stackTrace) {
-      logOneLineWithBorderDouble('Media pick failed: $error\n$stackTrace');
-      if (!mounted) {
-        return;
-      }
+    if (selectedFile == null) {
+      isLoading = false;
+      return;
+    }
+
+    var size = await File(selectedFile.path).length();
+    if (size >= 20000000) {
       isLoading = false;
       showOkDialog(
         context,
@@ -788,6 +790,15 @@ class HomePageController extends MyState<HomePage> {
       return DecryptionPage.routeName;
     }
     return EncryptionPage.routeName;
+  }
+
+  @visibleForTesting
+  Future<void> pickMediaFileForTest(
+    BuildContext context,
+    Future<XFile> Function({ImageSource source}) pickMethod,
+    ImageSource source,
+  ) async {
+    await _pickMediaFile(context, pickMethod, source);
   }
 
   Future<PackageInfo> _getPackageInfo() async {
