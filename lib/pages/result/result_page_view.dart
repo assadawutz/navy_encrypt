@@ -105,7 +105,7 @@ class _ResultPageView extends WidgetView<ResultPage, _ResultPageController> {
                   style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: !Platform.isWindows ? 16.0 : 8.0),
-                FileDetails(filePath: state._filePath),
+                FileDetails(filePath: state._processedFilePath),
                 SizedBox(height: !Platform.isWindows ? 32.0 : 16.0),
                 Column(
                   children: buttonDataList
