@@ -959,46 +959,6 @@ class _HomeMenuAction {
   String get label => labelBuilder();
 }
 
-typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
-
-class _HomeMenuAction {
-  const _HomeMenuAction({
-    @required this.assetPath,
-    @required this.labelBuilder,
-    @required this.onTap,
-    bool Function() isVisible,
-  }) : _isVisiblePredicate = isVisible;
-
-  final String assetPath;
-  final String Function() labelBuilder;
-  final _MenuActionHandler onTap;
-  final bool Function() _isVisiblePredicate;
-
-  bool get isVisible => _isVisiblePredicate?.call() ?? true;
-
-  String get label => labelBuilder();
-}
-
-typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
-
-class _HomeMenuAction {
-  const _HomeMenuAction({
-    @required this.assetPath,
-    @required this.labelBuilder,
-    @required this.onTap,
-    bool Function() isVisible,
-  }) : _isVisiblePredicate = isVisible;
-
-  final String assetPath;
-  final String Function() labelBuilder;
-  final _MenuActionHandler onTap;
-  final bool Function() _isVisiblePredicate;
-
-  bool get isVisible => _isVisiblePredicate?.call() ?? true;
-
-  String get label => labelBuilder();
-}
-
 class _HomeQuickAction {
   const _HomeQuickAction({
     @required this.icon,
