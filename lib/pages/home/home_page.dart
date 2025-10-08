@@ -915,8 +915,6 @@ class HomePageController extends MyState<HomePage> {
 
   Future<PackageInfo> _getPackageInfo() async {
     return await PackageInfo.fromPlatform();
-
-    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
@@ -1016,3 +1014,10 @@ class _HomeQuickAction {
 
   bool get isVisible => _isVisiblePredicate?.call() ?? true;
 }
+  Future<PackageInfo> get packageInfoFuture =>
+      _packageInfoFuture ??= _getPackageInfo();
+
+  void refreshPackageInfo() {
+    _packageInfoFuture = null;
+  }
+
