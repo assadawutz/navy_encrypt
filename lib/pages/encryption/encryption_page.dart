@@ -158,7 +158,15 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
         showOkDialog(context, e.toString());
       }
 
-      signatureCode = _watermarkEditingController.text;
+      if (signatureCode == null || signatureCode.isEmpty) {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถสร้างรหัสลายน้ำได้',
+        );
+        isLoading = false;
+        return;
+      }
       print("signatureCode1 = ${signatureCode}");
       print("signatureCode2 = ${signatureCode}");
       // ใส่ลายน้ำ

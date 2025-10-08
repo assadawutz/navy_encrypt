@@ -299,6 +299,15 @@ class Navec {
     var fileBytes = await File(filePath).readAsBytes();
 
     final signatureLength = Navec.headerFileSignature.length;
+    if (fileBytes.length < signatureLength) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์นี้ไม่ถูกต้อง หรืออาจไม่ได้ถูกเข้ารหัสด้วย NAVEC',
+      );
+      return null;
+    }
+
     bool hasVersion = false;
     if (fileBytes.length >=
         signatureLength + Navec.headerVersion.length) {
@@ -314,8 +323,19 @@ class Navec {
     var extensionFieldBeginIndex = signatureLength + versionLength;
     var algorithmFieldBeginIndex =
         extensionFieldBeginIndex + Navec.headerFileExtensionFieldLength;
-    var contentBeginIndex =
+    var minimumHeaderLength =
         algorithmFieldBeginIndex + Navec.headerAlgorithmFieldLength;
+
+    if (fileBytes.length < minimumHeaderLength) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์นี้ไม่ถูกต้อง หรืออาจได้รับความเสียหาย',
+      );
+      return null;
+    }
+
+    var contentBeginIndex = minimumHeaderLength;
 
     var logMap = <String, dynamic>{
       'Operation': 'Decryption',
@@ -417,18 +437,51 @@ class Navec {
       return null;
     }
 
+    if (contentEndIndex <= contentBeginIndex) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์ถูกเข้ารหัสไม่สมบูรณ์ หรือไฟล์อาจเสียหาย',
+      );
+      return null;
+    }
+
+    final payloadLength = contentEndIndex - contentBeginIndex;
+    if (hasVersion && algo is Aes && payloadLength <= Aes.ivLength) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์ถูกเข้ารหัสไม่สมบูรณ์ หรือไฟล์อาจเสียหาย',
+      );
+      return null;
+    }
+
     Uint8List ivBytes;
     if (hasVersion && algo is Aes) {
       final ivEndIndex = contentBeginIndex + Aes.ivLength;
-      if (ivEndIndex <= contentEndIndex) {
-        ivBytes = Uint8List.fromList(
-            fileBytes.sublist(contentBeginIndex, ivEndIndex));
-        contentBeginIndex = ivEndIndex;
+      if (ivEndIndex > contentEndIndex) {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไฟล์ถูกเข้ารหัสไม่สมบูรณ์ หรือไฟล์อาจเสียหาย',
+        );
+        return null;
       }
+      ivBytes = Uint8List.fromList(
+          fileBytes.sublist(contentBeginIndex, ivEndIndex));
+      contentBeginIndex = ivEndIndex;
     }
 
     final encryptedSlice =
         fileBytes.sublist(contentBeginIndex, contentEndIndex);
+    if (encryptedSlice.isEmpty) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์ถูกเข้ารหัสไม่สมบูรณ์ หรือไฟล์อาจเสียหาย',
+      );
+      return null;
+    }
     Uint8List decryptedBytes = algo.decrypt(
       password,
       Uint8List.fromList(encryptedSlice),
