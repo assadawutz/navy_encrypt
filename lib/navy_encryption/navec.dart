@@ -317,7 +317,8 @@ class Navec {
       ));
       hasVersion = versionCandidate == Navec.headerVersion;
     }
-    final versionLength = hasVersion ? Navec.headerVersion.length : 0;
+
+    int versionLength = hasVersion ? Navec.headerVersion.length : 0;
 
     var extensionFieldBeginIndex = signatureLength + versionLength;
     var algorithmFieldBeginIndex =
@@ -346,30 +347,19 @@ class Navec {
         utf8.decode(fileBytes.sublist(0, Navec.headerFileSignature.length));
     logMap['File signature'] = fileSignature;
 
-    if (fileSignature != Navec.headerFileSignature) {
-      showOkDialog(
-        context,
-        'ผิดพลาด',
-        textContent: 'ไฟล์นี้ไม่ถูกต้อง หรืออาจไม่ได้ถูกเข้ารหัสด้วย NAVEC',
-      );
-      return null;
-    }
-
-    var fileExtension = utf8
+    String fileExtension = utf8
         .decode(fileBytes.sublist(
           extensionFieldBeginIndex,
           algorithmFieldBeginIndex,
         ))
         .trim();
-    logMap['File extension (old)'] = fileExtension;
 
-    var algoCode = utf8
+    String algoCode = utf8
         .decode(fileBytes.sublist(
           algorithmFieldBeginIndex,
           contentBeginIndex,
         ))
         .trim();
-    logMap['Algorithm'] = algoCode;
 
     var contentEndIndex = fileBytes.length;
     String uuid;
@@ -384,14 +374,59 @@ class Navec {
       contentEndIndex = contentEndIndex - headerUUIDFieldLength;
     } catch (err) {}
 
-    logMap['Header version'] = hasVersion ? Navec.headerVersion : '1';
-
-    logWithBorder(logMap, 2);
-
     var algo = Navec.algorithms.firstWhere(
       (algo) => algo.code == algoCode,
       orElse: () => null,
     );
+
+    bool shouldFallbackToLegacyLayout = false;
+
+    if (hasVersion) {
+      if (algo == null) {
+        shouldFallbackToLegacyLayout = true;
+      } else if (algo is Aes) {
+        final ivEndIndexCandidate = contentBeginIndex + Aes.ivLength;
+        if (ivEndIndexCandidate > contentEndIndex) {
+          shouldFallbackToLegacyLayout = true;
+        }
+      }
+    }
+
+    if (shouldFallbackToLegacyLayout) {
+      hasVersion = false;
+      versionLength = 0;
+      extensionFieldBeginIndex = signatureLength + versionLength;
+      algorithmFieldBeginIndex =
+          extensionFieldBeginIndex + Navec.headerFileExtensionFieldLength;
+      contentBeginIndex =
+          algorithmFieldBeginIndex + Navec.headerAlgorithmFieldLength;
+
+      fileExtension = utf8
+          .decode(fileBytes.sublist(
+            extensionFieldBeginIndex,
+            algorithmFieldBeginIndex,
+          ))
+          .trim();
+
+      algoCode = utf8
+          .decode(fileBytes.sublist(
+            algorithmFieldBeginIndex,
+            contentBeginIndex,
+          ))
+          .trim();
+
+      algo = Navec.algorithms.firstWhere(
+        (algo) => algo.code == algoCode,
+        orElse: () => null,
+      );
+
+    }
+
+    logMap['File extension (old)'] = fileExtension;
+    logMap['Algorithm'] = algoCode;
+    logMap['Header version'] = hasVersion ? Navec.headerVersion : '1';
+
+    logWithBorder(logMap, 2);
 
     if (algo == null) {
       showOkDialog(
