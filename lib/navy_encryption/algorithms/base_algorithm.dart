@@ -38,7 +38,7 @@ abstract class BaseAlgorithm {
 
   Uint8List encrypt(String password, Uint8List bytes);
 
-  Uint8List decrypt(String password, Uint8List bytes);
+  Uint8List decrypt(String password, Uint8List bytes, {Uint8List iv});
 }
 
 class NotEncrypt extends BaseAlgorithm {
@@ -52,5 +52,5 @@ class NotEncrypt extends BaseAlgorithm {
   Uint8List encrypt(String password, Uint8List bytes) => null;
 
   @override
-  Uint8List decrypt(String password, Uint8List bytes) => null;
+  Uint8List decrypt(String password, Uint8List bytes, {Uint8List iv}) => null;
 }
