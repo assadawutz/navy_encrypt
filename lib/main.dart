@@ -45,7 +45,11 @@ Future<void> main(List<String> arguments) async {
     DeviceOrientation.portraitUp,
   ]);
 
-  HttpOverrides.global = new MyHttpOverrides();
+  const bool isProductMode = bool.fromEnvironment('dart.vm.product');
+
+  if (!isProductMode) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
 
   //#region Firebase
 
