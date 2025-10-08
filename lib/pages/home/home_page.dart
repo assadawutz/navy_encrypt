@@ -53,7 +53,6 @@ class HomePageController extends MyState<HomePage> {
 
   final ImagePicker _picker = ImagePicker();
   List<_HomeMenuAction> _menuActions;
-  List<_HomeQuickAction> _quickActions;
   String filePath;
   Future<PackageInfo> _packageInfoFuture;
 
@@ -64,15 +63,6 @@ class HomePageController extends MyState<HomePage> {
       return const <_HomeMenuAction>[];
     }
     return _menuActions
-        .where((action) => action.isVisible)
-        .toList(growable: false);
-  }
-
-  List<_HomeQuickAction> get quickActions {
-    if (_quickActions == null) {
-      return const <_HomeQuickAction>[];
-    }
-    return _quickActions
         .where((action) => action.isVisible)
         .toList(growable: false);
   }
@@ -167,50 +157,6 @@ class HomePageController extends MyState<HomePage> {
         assetPath: 'assets/images/ic_history.png',
         labelBuilder: () => 'ประวัติ',
         onTap: _openHistory,
-      ),
-    ];
-  }
-
-  void _initQuickActions() {
-    _quickActions = <_HomeQuickAction>[
-      _HomeQuickAction(
-        icon: Icons.lock_outline,
-        label: 'เข้ารหัสไฟล์',
-        tooltip: 'เลือกไฟล์หรือภาพเพื่อเข้ารหัสและเพิ่มลายน้ำ',
-        onTap: (context) {
-          Navigator.pushNamed(
-            context,
-            EncryptionPage.routeName,
-          );
-        },
-      ),
-      _HomeQuickAction(
-        icon: Icons.lock_open,
-        label: 'ถอดรหัสไฟล์',
-        tooltip: 'เปิดไฟล์ที่ถูกเข้ารหัสเพื่อถอดรหัสและตรวจสอบลายน้ำ',
-        onTap: (context) {
-          Navigator.pushNamed(
-            context,
-            DecryptionPage.routeName,
-          );
-        },
-      ),
-      _HomeQuickAction(
-        icon: Icons.water_damage_outlined,
-        label: 'ตั้งค่าลายน้ำ',
-        tooltip: 'กำหนดค่าลายน้ำก่อนเข้ารหัสหรือแชร์ไฟล์',
-        onTap: (context) {
-          Navigator.pushNamed(
-            context,
-            SettingsPage.routeName,
-          );
-        },
-      ),
-      _HomeQuickAction(
-        icon: Icons.ios_share,
-        label: 'แชร์ไฟล์',
-        tooltip: 'เลือกไฟล์จากเครื่องแล้วแชร์ผ่านอีเมลหรือแอปอื่น',
-        onTap: _shareLocalFile,
       ),
     ];
   }
@@ -967,8 +913,10 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
-  Future<PackageInfo> get packageInfoFuture {
-    return _packageInfoFuture ??= PackageInfo.fromPlatform();
+  Future<PackageInfo> _getPackageInfo() async {
+    return await PackageInfo.fromPlatform();
+
+    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
@@ -989,6 +937,46 @@ class HomePageController extends MyState<HomePage> {
 
     return 'เวอร์ชัน $version+$buildNumber';
   }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
 }
 
 typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);

@@ -8,7 +8,6 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
     var width = screenWidth(context);
     var height = screenHeight(context);
     final menuActions = state.menuActions;
-    final quickActions = state.quickActions;
 
     return HeaderScaffold(
       showBackButton: false,
@@ -62,22 +61,6 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          if (quickActions.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12.0,
-                runSpacing: 12.0,
-                children: quickActions
-                    .map(
-                      (action) => _QuickActionButton(
-                        action: action,
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
-            ),
           for (var i = 0; i < menuActions.length; i += 2)
             Row(
               children: [

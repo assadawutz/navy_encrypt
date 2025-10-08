@@ -229,17 +229,19 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
         '$message${doEncrypt ? ((message == '' ? '' : 'และ') + 'เข้ารหัส') : ''}';
     print(
         "_fileExtension_fileExtension ${p.extension(file.path).substring(1).toLowerCase()}");
+    final processedFilePath = file.path;
+    final isEncryptedFile = p.extension(processedFilePath).toLowerCase() ==
+        '.${Navec.encryptedFileExtension}';
+
     Navigator.pushReplacementNamed(
       context,
       ResultPage.routeName,
       arguments: {
-        'filePath': file.path,
+        'filePath': processedFilePath,
+        'processedFilePath': processedFilePath,
         'message': '$messageสำเร็จ',
-        'isEncryption':
-            p.extension(file.path).substring(1).toLowerCase() == "enc"
-                ? false
-                : true,
-        'fileEncryptPath': _toBeEncryptedFilePath,
+        'isEncryptedFile': isEncryptedFile,
+        'originalInputPath': _toBeEncryptedFilePath,
         'signatureCode': signatureCode,
         'type': doEncrypt ? 'encryption' : 'watermark'
       },

@@ -10,7 +10,6 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
     final width = screenWidth(context);
     final height = screenHeight(context);
     final menuActions = state.menuActions;
-    final quickActions = state.quickActions;
 
     return Scaffold(
       body: HeaderScaffold(
