@@ -379,9 +379,11 @@ class Navec {
       orElse: () => null,
     );
 
-    bool shouldFallbackToLegacyLayout = false;
+    bool usingVersionLayout = hasVersion;
 
-    if (hasVersion) {
+    if (usingVersionLayout) {
+      bool shouldFallbackToLegacyLayout = false;
+
       if (algo == null) {
         shouldFallbackToLegacyLayout = true;
       } else if (algo is Aes) {
@@ -390,36 +392,36 @@ class Navec {
           shouldFallbackToLegacyLayout = true;
         }
       }
-    }
 
-    if (shouldFallbackToLegacyLayout) {
-      hasVersion = false;
-      versionLength = 0;
-      extensionFieldBeginIndex = signatureLength + versionLength;
-      algorithmFieldBeginIndex =
-          extensionFieldBeginIndex + Navec.headerFileExtensionFieldLength;
-      contentBeginIndex =
-          algorithmFieldBeginIndex + Navec.headerAlgorithmFieldLength;
+      if (shouldFallbackToLegacyLayout) {
+        usingVersionLayout = false;
+        hasVersion = false;
+        versionLength = 0;
+        extensionFieldBeginIndex = signatureLength + versionLength;
+        algorithmFieldBeginIndex =
+            extensionFieldBeginIndex + Navec.headerFileExtensionFieldLength;
+        contentBeginIndex =
+            algorithmFieldBeginIndex + Navec.headerAlgorithmFieldLength;
 
-      fileExtension = utf8
-          .decode(fileBytes.sublist(
-            extensionFieldBeginIndex,
-            algorithmFieldBeginIndex,
-          ))
-          .trim();
+        fileExtension = utf8
+            .decode(fileBytes.sublist(
+              extensionFieldBeginIndex,
+              algorithmFieldBeginIndex,
+            ))
+            .trim();
 
-      algoCode = utf8
-          .decode(fileBytes.sublist(
-            algorithmFieldBeginIndex,
-            contentBeginIndex,
-          ))
-          .trim();
+        algoCode = utf8
+            .decode(fileBytes.sublist(
+              algorithmFieldBeginIndex,
+              contentBeginIndex,
+            ))
+            .trim();
 
-      algo = Navec.algorithms.firstWhere(
-        (algo) => algo.code == algoCode,
-        orElse: () => null,
-      );
-
+        algo = Navec.algorithms.firstWhere(
+          (algo) => algo.code == algoCode,
+          orElse: () => null,
+        );
+      }
     }
 
     logMap['File extension (old)'] = fileExtension;
@@ -447,7 +449,7 @@ class Navec {
     }
 
     final payloadLength = contentEndIndex - contentBeginIndex;
-    if (hasVersion && algo is Aes && payloadLength <= Aes.ivLength) {
+    if (usingVersionLayout && algo is Aes && payloadLength <= Aes.ivLength) {
       showOkDialog(
         context,
         'ผิดพลาด',
@@ -457,16 +459,8 @@ class Navec {
     }
 
     Uint8List ivBytes;
-    if (hasVersion && algo is Aes) {
+    if (usingVersionLayout && algo is Aes) {
       final ivEndIndex = contentBeginIndex + Aes.ivLength;
-      if (ivEndIndex > contentEndIndex) {
-        showOkDialog(
-          context,
-          'ผิดพลาด',
-          textContent: 'ไฟล์ถูกเข้ารหัสไม่สมบูรณ์ หรือไฟล์อาจเสียหาย',
-        );
-        return null;
-      }
       ivBytes = Uint8List.fromList(
           fileBytes.sublist(contentBeginIndex, ivEndIndex));
       contentBeginIndex = ivEndIndex;
