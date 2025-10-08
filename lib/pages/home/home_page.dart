@@ -1,5 +1,6 @@
 library home_page;
 
+import 'dart:async' show FutureOr;
 import 'dart:io' show Directory, File, FileSystemEntity, FileSystemException, Platform;
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -32,6 +33,7 @@ import 'package:navy_encrypt/pages/settings/settings_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 part 'home_page_view.dart';
 part 'home_page_view_win.dart';
@@ -50,10 +52,30 @@ class HomePageController extends MyState<HomePage> {
   static const int maxSelectableFileSizeBytes = 20 * 1024 * 1024;
 
   final ImagePicker _picker = ImagePicker();
-  List<Map<String, dynamic>> _menuData;
+  List<_HomeMenuAction> _menuActions;
+  List<_HomeQuickAction> _quickActions;
   String filePath;
+  Future<PackageInfo> _packageInfoFuture;
 
   HomePageController(this.filePath);
+
+  List<_HomeMenuAction> get menuActions {
+    if (_menuActions == null) {
+      return const <_HomeMenuAction>[];
+    }
+    return _menuActions
+        .where((action) => action.isVisible)
+        .toList(growable: false);
+  }
+
+  List<_HomeQuickAction> get quickActions {
+    if (_quickActions == null) {
+      return const <_HomeQuickAction>[];
+    }
+    return _quickActions
+        .where((action) => action.isVisible)
+        .toList(growable: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +88,7 @@ class HomePageController extends MyState<HomePage> {
   void initState() {
     super.initState();
     _initMenuData();
+    _initQuickActions();
     // Future.delayed(
     //     Duration.zero, () => print('SCREEN RATIO: ${screenRatio(context)}'));
 
@@ -110,46 +133,93 @@ class HomePageController extends MyState<HomePage> {
   }
 
   void _initMenuData() {
-    _menuData = [
-      {
-        'image': 'assets/images/ic_document.png',
-        'text': Platform.isWindows || Platform.isMacOS
-            ? 'ไฟล์ในเครื่อง'
-            : 'ไฟล์ในเครื่อง',
-        'onClick': _pickFromFileSystem,
-      },
-      if (!Platform.isWindows || Platform.isMacOS)
-        {
-          'image': 'assets/images/ic_camera.png',
-          'text': 'กล้อง',
-          'onClick': _pickFromCamera,
-        },
-      {
-        'image': 'assets/images/ic_gallery.png',
-        'text': Platform.isWindows || Platform.isMacOS ? 'รูปภาพ' : 'คลังภาพ',
-        'onClick': _pickFromGallery,
-      },
-      {
-        'image': 'assets/images/ic_google_drive.png',
-        'text': 'Google Drive',
-        'onClick': _doPickFromGoogleDrive,
-      },
-      {
-        'image': 'assets/images/ic_onedrive_new.png',
-        'text': 'OneDrive',
-        'onClick': _pickFromOneDrive,
-      },
-      {
-        'image': 'assets/images/ic_history.png',
-        'text': 'ประวัติ',
-        'onClick': (BuildContext context) {
+    final bool isDesktopPlatform = Platform.isWindows || Platform.isMacOS;
+    final bool isMobilePlatform = Platform.isAndroid || Platform.isIOS;
+
+    _menuActions = <_HomeMenuAction>[
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_document.png',
+        labelBuilder: () => 'ไฟล์ในเครื่อง',
+        onTap: _pickFromFileSystem,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_camera.png',
+        labelBuilder: () => 'กล้อง',
+        onTap: _pickFromCamera,
+        isVisible: () => isMobilePlatform,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_gallery.png',
+        labelBuilder: () => isDesktopPlatform ? 'รูปภาพ' : 'คลังภาพ',
+        onTap: _pickFromGallery,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_google_drive.png',
+        labelBuilder: () => 'Google Drive',
+        onTap: _doPickFromGoogleDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_onedrive_new.png',
+        labelBuilder: () => 'OneDrive',
+        onTap: _pickFromOneDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_history.png',
+        labelBuilder: () => 'ประวัติ',
+        onTap: _openHistory,
+      ),
+    ];
+  }
+
+  void _initQuickActions() {
+    _quickActions = <_HomeQuickAction>[
+      _HomeQuickAction(
+        icon: Icons.lock_outline,
+        label: 'เข้ารหัสไฟล์',
+        tooltip: 'เลือกไฟล์หรือภาพเพื่อเข้ารหัสและเพิ่มลายน้ำ',
+        onTap: (context) {
           Navigator.pushNamed(
             context,
-            HistoryPage.routeName,
+            EncryptionPage.routeName,
           );
         },
-      },
+      ),
+      _HomeQuickAction(
+        icon: Icons.lock_open,
+        label: 'ถอดรหัสไฟล์',
+        tooltip: 'เปิดไฟล์ที่ถูกเข้ารหัสเพื่อถอดรหัสและตรวจสอบลายน้ำ',
+        onTap: (context) {
+          Navigator.pushNamed(
+            context,
+            DecryptionPage.routeName,
+          );
+        },
+      ),
+      _HomeQuickAction(
+        icon: Icons.water_damage_outlined,
+        label: 'ตั้งค่าลายน้ำ',
+        tooltip: 'กำหนดค่าลายน้ำก่อนเข้ารหัสหรือแชร์ไฟล์',
+        onTap: (context) {
+          Navigator.pushNamed(
+            context,
+            SettingsPage.routeName,
+          );
+        },
+      ),
+      _HomeQuickAction(
+        icon: Icons.ios_share,
+        label: 'แชร์ไฟล์',
+        tooltip: 'เลือกไฟล์จากเครื่องแล้วแชร์ผ่านอีเมลหรือแอปอื่น',
+        onTap: _shareLocalFile,
+      ),
     ];
+  }
+
+  void _openHistory(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      HistoryPage.routeName,
+    );
   }
 
   _pickFromFileSystem(BuildContext context) async {
@@ -284,38 +354,68 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _openSystemPicker2(BuildContext context) async {
-    File _file;
+  Future<void> _openSystemPicker2(BuildContext context) async {
+    final FilePickerResult result = await FilePicker.platform.pickFiles();
+    if (result == null || result.files.isEmpty) {
+      return;
+    }
 
-    FilePickerResult result = await FilePicker.platform.pickFiles();
+    final String selectedPath = result.files.single.path;
+    if (selectedPath == null || selectedPath.trim().isEmpty) {
+      return;
+    }
 
-    final file = File(result.files.single.path);
-    _file = file;
+    final File selectedFile = File(selectedPath);
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
-      // print("fieleee ${_file.path}");
+      // print("fieleee ${selectedFile.path}");
     });
   }
 
-  _openSystemPicker(BuildContext context,
-      {bool pickImage = false, bool pickVideo = false}) async {
+  Future<void> _openSystemPicker(
+    BuildContext context, {
+    bool pickImage = false,
+    bool pickVideo = false,
+  }) async {
+    final selectedFilePath = await _pickFileFromSystem(
+      context,
+      pickImage: pickImage,
+      pickVideo: pickVideo,
+      keepLoadingOnSuccess: true,
+      loadingText: 'กำลังแสดงไดอะล็อกสำหรับเลือกไฟล์',
+    );
+
+    if (selectedFilePath == null) {
+      return;
+    }
+
+    await _processPickedFile(selectedFilePath);
+  }
+
+  Future<String> _pickFileFromSystem(
+    BuildContext context, {
+    bool pickImage = false,
+    bool pickVideo = false,
+    bool keepLoadingOnSuccess = false,
+    String loadingText,
+  }) async {
     if (Platform.isAndroid == true) {
       await _getStoragePermission();
-      // final permission1 = Permission.storage;
-      final permission2 = Permission.photos;
-      final permission3 = Permission.audio;
-      final permission4 = Permission.camera;
-      // if (await permission1.isDenied) {
-      //   print("---photos permission---");
-      //   await permission1.request();
-      // }
-      if (await permission2.isDenied) {
-        await permission2.request();
+      final permissionPhotos = Permission.photos;
+      final permissionAudio = Permission.audio;
+      final permissionCamera = Permission.camera;
+
+      if (await permissionPhotos.isDenied) {
+        await permissionPhotos.request();
       }
-      if (await permission3.isDenied) {
-        await permission3.request();
+      if (await permissionAudio.isDenied) {
+        await permissionAudio.request();
       }
-      if (await permission4.isDenied) {
-        await permission4.request();
+      if (await permissionCamera.isDenied) {
+        await permissionCamera.request();
       }
     }
 
@@ -323,7 +423,7 @@ class HomePageController extends MyState<HomePage> {
 
     try {
       isLoading = true;
-      loadingMessage = 'กำลังแสดงไดอะล็อกสำหรับเลือกไฟล์';
+      loadingMessage = loadingText ?? 'กำลังเลือกไฟล์';
 
       if (pickImage) {
         pickedFile = await FilePickerCross.importFromStorage(
@@ -347,12 +447,12 @@ class HomePageController extends MyState<HomePage> {
       }
     } on FileSelectionCanceledError {
       _stopLoading();
-      return;
+      return null;
     } catch (error, stackTrace) {
       logOneLineWithBorderDouble(
           'System picker failed: $error\n$stackTrace');
       if (!mounted) {
-        return;
+        return null;
       }
       _stopLoading();
       showOkDialog(
@@ -360,16 +460,16 @@ class HomePageController extends MyState<HomePage> {
         'ผิดพลาด',
         textContent: 'ไม่สามารถเลือกไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
       );
-      return;
+      return null;
     }
 
     if (!mounted) {
-      return;
+      return null;
     }
 
     if (pickedFile == null) {
       _stopLoading();
-      return;
+      return null;
     }
 
     final pickedFilePath = pickedFile.path?.trim();
@@ -380,10 +480,14 @@ class HomePageController extends MyState<HomePage> {
         'ผิดพลาด',
         textContent: 'ไม่สามารถอ่านไฟล์ที่เลือกได้',
       );
-      return;
+      return null;
     }
 
-    await _processPickedFile(pickedFilePath);
+    if (!keepLoadingOnSuccess) {
+      _stopLoading();
+    }
+
+    return pickedFilePath;
   }
 
   _pickFromCamera(BuildContext context) async {
@@ -518,39 +622,61 @@ class HomePageController extends MyState<HomePage> {
     );
   }
 
-  _doPickFromGoogleDrive(BuildContext context) async {
+  Future<void> _doPickFromGoogleDrive(BuildContext context) async {
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน Google Drive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var googleDrive = GoogleDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await googleDrive.signInWithOAuth2()
-        : await googleDrive.signIn();
+    final googleDrive = GoogleDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await googleDrive.signInWithOAuth2()
+          : await googleDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
             cloudDrive: googleDrive,
             title: 'Google Drive',
             headerImagePath: 'assets/images/ic_google_drive.png',
-            rootName: 'Drive'),
-      );
-    } else {
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register Google Drive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
   }
 
-  _pickFromOneDrive(BuildContext context) async {
+  Future<void> _pickFromOneDrive(BuildContext context) async {
     /*if (Platform.isWindows || Platform.isMacOS) {
       var oneDrive = OneDrive(CloudPickerMode.file);
       var signInSuccess = await oneDrive.signInWithOAuth2();
@@ -560,36 +686,57 @@ class HomePageController extends MyState<HomePage> {
       return;
     }*/
 
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน OneDrive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var oneDrive = OneDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await oneDrive.signInWithOAuth2()
-        : await oneDrive.signIn();
+    final oneDrive = OneDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await oneDrive.signInWithOAuth2()
+          : await oneDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive,
-          title: 'OneDrive',
-          headerImagePath: 'assets/images/ic_onedrive_new.png',
-          rootName: 'Drive',
-        ),
-      );
-    } else {
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
+            cloudDrive: oneDrive,
+            title: 'OneDrive',
+            headerImagePath: 'assets/images/ic_onedrive_new.png',
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register OneDrive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
 
     /*final success = await onedrive.connect();
 
@@ -701,6 +848,7 @@ class HomePageController extends MyState<HomePage> {
   }
 
   Future<void> _processPickedFile(String filePath) async {
+    loadingMessage = 'กำลังตรวจสอบไฟล์';
     final normalizedPath = filePath?.trim();
     if (normalizedPath == null || normalizedPath.isEmpty) {
       _stopLoading();
@@ -771,12 +919,39 @@ class HomePageController extends MyState<HomePage> {
     );
   }
 
+  Future<void> _shareLocalFile(BuildContext context) async {
+    final selectedFilePath = await _pickFileFromSystem(
+      context,
+      loadingText: 'กำลังเลือกไฟล์เพื่อแชร์',
+    );
+
+    if (selectedFilePath == null) {
+      return;
+    }
+
+    try {
+      await Share.shareFiles(<String>[selectedFilePath]);
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to open share sheet: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถแชร์ไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
+      );
+    }
+  }
+
   void _stopLoading() {
     if (!mounted) {
       return;
     }
 
     isLoading = false;
+    loadingMessage = '';
   }
 
   String _resolveRouteForFile(String filePath) {
@@ -792,21 +967,64 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
-  @visibleForTesting
-  Future<void> pickMediaFileForTest(
-    BuildContext context,
-    Future<XFile> Function({ImageSource source}) pickMethod,
-    ImageSource source,
-  ) async {
-    await _pickMediaFile(context, pickMethod, source);
+  Future<PackageInfo> get packageInfoFuture {
+    return _packageInfoFuture ??= PackageInfo.fromPlatform();
   }
 
-  Future<PackageInfo> _getPackageInfo() async {
-    return await PackageInfo.fromPlatform();
+  String buildVersionLabel(PackageInfo packageInfo) {
+    if (packageInfo == null) {
+      return '';
+    }
 
-    /*String appName = packageInfo.appName;
-    String packageName = packageInfo.packageName;
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;*/
+    final String version = packageInfo.version?.trim();
+    final String buildNumber = packageInfo.buildNumber?.trim();
+
+    if (version == null || version.isEmpty) {
+      return '';
+    }
+
+    if (buildNumber == null || buildNumber.isEmpty) {
+      return 'เวอร์ชัน $version';
+    }
+
+    return 'เวอร์ชัน $version+$buildNumber';
   }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
+}
+
+class _HomeQuickAction {
+  const _HomeQuickAction({
+    @required this.icon,
+    @required this.label,
+    @required this.onTap,
+    this.tooltip,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final IconData icon;
+  final String label;
+  final _MenuActionHandler onTap;
+  final String tooltip;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
 }

@@ -7,6 +7,8 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
   Widget build(BuildContext context) {
     var width = screenWidth(context);
     var height = screenHeight(context);
+    final menuActions = state.menuActions;
+    final quickActions = state.quickActions;
 
     return HeaderScaffold(
       showBackButton: false,
@@ -60,27 +62,45 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          for (var i = 0; i < state._menuData.length; i += 2)
+          if (quickActions.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12.0,
+                runSpacing: 12.0,
+                children: quickActions
+                    .map(
+                      (action) => _QuickActionButton(
+                        action: action,
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ),
+          for (var i = 0; i < menuActions.length; i += 2)
             Row(
               children: [
-                for (var j = i; j < i + 2 && j < state._menuData.length; j++)
+                for (var j = i; j < i + 2 && j < menuActions.length; j++)
                   MenuItem(
-                    text: state._menuData[j]['text'],
-                    image: state._menuData[j]['image'],
-                    onClick: () {
-                      state._menuData[j]['onClick'](context);
-                    },
+                    text: menuActions[j].label,
+                    image: menuActions[j].assetPath,
+                    onClick: () => menuActions[j].onTap(context),
                   ),
               ],
             ),
           SizedBox(height: 20), // เผื่อ space ด้านล่าง
           FutureBuilder(
-            future: state._getPackageInfo(),
+            future: state.packageInfoFuture,
             builder:
                 (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
               if (snapshot.hasData) {
+                final versionLabel = state.buildVersionLabel(snapshot.data);
+                if (versionLabel.isEmpty) {
+                  return SizedBox.shrink();
+                }
                 return Text(
-                  'เวอร์ชัน 3.0.1+4',
+                  versionLabel,
                   style: TextStyle(fontSize: 18.0),
                 );
               }
@@ -107,11 +127,18 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
 class MenuItem extends StatelessWidget {
   final String image;
   final String text;
-  final Function onClick;
+  final VoidCallback onClick;
   final double size;
   final double borderWidth;
 
-  MenuItem({this.image, this.text, this.onClick, this.size, this.borderWidth});
+  const MenuItem({
+    Key key,
+    @required this.image,
+    @required this.text,
+    @required this.onClick,
+    this.size,
+    this.borderWidth,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -167,5 +194,39 @@ class MenuItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _QuickActionButton extends StatelessWidget {
+  const _QuickActionButton({Key key, @required this.action})
+      : super(key: key);
+
+  final _HomeQuickAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+      ),
+      icon: Icon(action.icon, size: 20.0),
+      label: Text(
+        action.label,
+        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+      ),
+      onPressed: () => action.onTap(context),
+    );
+
+    if (action.tooltip?.isNotEmpty == true) {
+      return Tooltip(
+        message: action.tooltip,
+        child: button,
+      );
+    }
+
+    return button;
   }
 }
