@@ -169,19 +169,40 @@ class ShareIntentHandler {
       return null;
     }
 
-    String extension = p.extension(filePath).substring(1).toLowerCase();
-    // If extension is not 'enc', append or change it.
+    final originalFile = File(filePath);
+    if (!await originalFile.exists()) {
+      logOneLineWithBorderSingle(
+          'Shared file could not be found at resolved path: $filePath');
+      return null;
+    }
+
+    final extensionWithDot = p.extension(filePath);
+    final hasExtension = extensionWithDot.isNotEmpty;
+    final extension = hasExtension
+        ? extensionWithDot.replaceFirst('.', '').toLowerCase()
+        : '';
+
+    // If extension is not 'enc', create a copied file with '.enc' extension
+    // instead of renaming the original file.
     if (extension != 'enc') {
-      int dotIndex = filePath.lastIndexOf('.');
+      final directory = originalFile.parent.path;
+      final baseName = hasExtension
+          ? p.basenameWithoutExtension(filePath)
+          : p.basename(filePath);
+      final encFilePath = p.join(directory, '$baseName.enc');
 
-      File f;
-      if (dotIndex != -1) {
-        f = File(filePath).renameSync('${filePath.substring(0, dotIndex)}.enc');
-      } else {
-        f = File(filePath).renameSync('filePath.enc');
+      try {
+        final encFile = await originalFile.copy(encFilePath);
+        filePath = encFile.path;
+      } on FileSystemException catch (error) {
+        logOneLineWithBorderSingle(
+            'Failed to create .enc copy for shared file: ${error.message}');
+        return null;
+      } catch (error) {
+        logOneLineWithBorderSingle(
+            'Unexpected error while creating .enc copy: $error');
+        return null;
       }
-
-      filePath = f.path;
     }
 
     return filePath;
