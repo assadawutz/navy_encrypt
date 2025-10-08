@@ -974,3 +974,10 @@ class _HomeQuickAction {
 
   bool get isVisible => _isVisiblePredicate?.call() ?? true;
 }
+  Future<PackageInfo> get packageInfoFuture =>
+      _packageInfoFuture ??= _getPackageInfo();
+
+  void refreshPackageInfo() {
+    _packageInfoFuture = null;
+  }
+
