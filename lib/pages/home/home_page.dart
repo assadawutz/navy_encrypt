@@ -1,5 +1,6 @@
 library home_page;
 
+import 'dart:async' show FutureOr;
 import 'dart:io' show Directory, File, FileSystemEntity, FileSystemException, Platform;
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -50,10 +51,20 @@ class HomePageController extends MyState<HomePage> {
   static const int maxSelectableFileSizeBytes = 20 * 1024 * 1024;
 
   final ImagePicker _picker = ImagePicker();
-  List<Map<String, dynamic>> _menuData;
+  List<_HomeMenuAction> _menuActions;
   String filePath;
+  Future<PackageInfo> _packageInfoFuture;
 
   HomePageController(this.filePath);
+
+  List<_HomeMenuAction> get menuActions {
+    if (_menuActions == null) {
+      return const <_HomeMenuAction>[];
+    }
+    return _menuActions
+        .where((action) => action.isVisible)
+        .toList(growable: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,46 +121,49 @@ class HomePageController extends MyState<HomePage> {
   }
 
   void _initMenuData() {
-    _menuData = [
-      {
-        'image': 'assets/images/ic_document.png',
-        'text': Platform.isWindows || Platform.isMacOS
-            ? 'ไฟล์ในเครื่อง'
-            : 'ไฟล์ในเครื่อง',
-        'onClick': _pickFromFileSystem,
-      },
-      if (!Platform.isWindows || Platform.isMacOS)
-        {
-          'image': 'assets/images/ic_camera.png',
-          'text': 'กล้อง',
-          'onClick': _pickFromCamera,
-        },
-      {
-        'image': 'assets/images/ic_gallery.png',
-        'text': Platform.isWindows || Platform.isMacOS ? 'รูปภาพ' : 'คลังภาพ',
-        'onClick': _pickFromGallery,
-      },
-      {
-        'image': 'assets/images/ic_google_drive.png',
-        'text': 'Google Drive',
-        'onClick': _doPickFromGoogleDrive,
-      },
-      {
-        'image': 'assets/images/ic_onedrive_new.png',
-        'text': 'OneDrive',
-        'onClick': _pickFromOneDrive,
-      },
-      {
-        'image': 'assets/images/ic_history.png',
-        'text': 'ประวัติ',
-        'onClick': (BuildContext context) {
-          Navigator.pushNamed(
-            context,
-            HistoryPage.routeName,
-          );
-        },
-      },
+    final bool isDesktopPlatform = Platform.isWindows || Platform.isMacOS;
+    final bool isMobilePlatform = Platform.isAndroid || Platform.isIOS;
+
+    _menuActions = <_HomeMenuAction>[
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_document.png',
+        labelBuilder: () => 'ไฟล์ในเครื่อง',
+        onTap: _pickFromFileSystem,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_camera.png',
+        labelBuilder: () => 'กล้อง',
+        onTap: _pickFromCamera,
+        isVisible: () => isMobilePlatform,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_gallery.png',
+        labelBuilder: () => isDesktopPlatform ? 'รูปภาพ' : 'คลังภาพ',
+        onTap: _pickFromGallery,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_google_drive.png',
+        labelBuilder: () => 'Google Drive',
+        onTap: _doPickFromGoogleDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_onedrive_new.png',
+        labelBuilder: () => 'OneDrive',
+        onTap: _pickFromOneDrive,
+      ),
+      _HomeMenuAction(
+        assetPath: 'assets/images/ic_history.png',
+        labelBuilder: () => 'ประวัติ',
+        onTap: _openHistory,
+      ),
     ];
+  }
+
+  void _openHistory(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      HistoryPage.routeName,
+    );
   }
 
   _pickFromFileSystem(BuildContext context) async {
@@ -284,15 +298,24 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _openSystemPicker2(BuildContext context) async {
-    File _file;
+  Future<void> _openSystemPicker2(BuildContext context) async {
+    final FilePickerResult result = await FilePicker.platform.pickFiles();
+    if (result == null || result.files.isEmpty) {
+      return;
+    }
 
-    FilePickerResult result = await FilePicker.platform.pickFiles();
+    final String selectedPath = result.files.single.path;
+    if (selectedPath == null || selectedPath.trim().isEmpty) {
+      return;
+    }
 
-    final file = File(result.files.single.path);
-    _file = file;
+    final File selectedFile = File(selectedPath);
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
-      // print("fieleee ${_file.path}");
+      // print("fieleee ${selectedFile.path}");
     });
   }
 
@@ -518,39 +541,61 @@ class HomePageController extends MyState<HomePage> {
     );
   }
 
-  _doPickFromGoogleDrive(BuildContext context) async {
+  Future<void> _doPickFromGoogleDrive(BuildContext context) async {
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน Google Drive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var googleDrive = GoogleDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await googleDrive.signInWithOAuth2()
-        : await googleDrive.signIn();
+    final googleDrive = GoogleDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await googleDrive.signInWithOAuth2()
+          : await googleDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
             cloudDrive: googleDrive,
             title: 'Google Drive',
             headerImagePath: 'assets/images/ic_google_drive.png',
-            rootName: 'Drive'),
-      );
-    } else {
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register Google Drive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
   }
 
-  _pickFromOneDrive(BuildContext context) async {
+  Future<void> _pickFromOneDrive(BuildContext context) async {
     /*if (Platform.isWindows || Platform.isMacOS) {
       var oneDrive = OneDrive(CloudPickerMode.file);
       var signInSuccess = await oneDrive.signInWithOAuth2();
@@ -560,36 +605,57 @@ class HomePageController extends MyState<HomePage> {
       return;
     }*/
 
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน OneDrive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var oneDrive = OneDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await oneDrive.signInWithOAuth2()
-        : await oneDrive.signIn();
+    final oneDrive = OneDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await oneDrive.signInWithOAuth2()
+          : await oneDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive,
-          title: 'OneDrive',
-          headerImagePath: 'assets/images/ic_onedrive_new.png',
-          rootName: 'Drive',
-        ),
-      );
-    } else {
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
+            cloudDrive: oneDrive,
+            title: 'OneDrive',
+            headerImagePath: 'assets/images/ic_onedrive_new.png',
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register OneDrive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
 
     /*final success = await onedrive.connect();
 
@@ -792,21 +858,46 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
-  @visibleForTesting
-  Future<void> pickMediaFileForTest(
-    BuildContext context,
-    Future<XFile> Function({ImageSource source}) pickMethod,
-    ImageSource source,
-  ) async {
-    await _pickMediaFile(context, pickMethod, source);
+  Future<PackageInfo> get packageInfoFuture {
+    return _packageInfoFuture ??= PackageInfo.fromPlatform();
   }
 
-  Future<PackageInfo> _getPackageInfo() async {
-    return await PackageInfo.fromPlatform();
+  String buildVersionLabel(PackageInfo packageInfo) {
+    if (packageInfo == null) {
+      return '';
+    }
 
-    /*String appName = packageInfo.appName;
-    String packageName = packageInfo.packageName;
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;*/
+    final String version = packageInfo.version?.trim();
+    final String buildNumber = packageInfo.buildNumber?.trim();
+
+    if (version == null || version.isEmpty) {
+      return '';
+    }
+
+    if (buildNumber == null || buildNumber.isEmpty) {
+      return 'เวอร์ชัน $version';
+    }
+
+    return 'เวอร์ชัน $version+$buildNumber';
   }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
 }
