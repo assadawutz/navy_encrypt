@@ -33,7 +33,56 @@ void main() {
     final originalBytes =
         Uint8List.fromList(List<int>.generate(48, (index) => index));
     const uuid = '12345678-1234-1234-1234-123456789012';
-    const originalExtension = '2data';
+    Future<void> _expectLegacyDecryption({
+      @required BuildContext context,
+      @required String originalExtension,
+    }) async {
+      final aes = Aes(keyLengthInBytes: 16);
+      String legacyKeyText = password.trim();
+      while (legacyKeyText.length < aes.keyLengthInBytes) {
+        legacyKeyText = '$legacyKeyText${Navec.passwordPadChar}';
+      }
+      final legacyKey = enc.Key.fromUtf8(legacyKeyText);
+      final legacyIv = enc.IV.fromLength(Aes.ivLength);
+      final legacyEncrypter = enc.Encrypter(enc.AES(legacyKey));
+      final legacyEncrypted = legacyEncrypter.encryptBytes(
+        originalBytes,
+        iv: legacyIv,
+      );
+
+      final extensionField = originalExtension
+          .padRight(Navec.headerFileExtensionFieldLength);
+      final algoField = 'AES128'.padRight(Navec.headerAlgorithmFieldLength);
+
+      final payloadBytes = <int>[
+        ...utf8.encode(Navec.headerFileSignature),
+        ...utf8.encode(extensionField),
+        ...utf8.encode(algoField),
+        ...legacyEncrypted.bytes,
+        ...utf8.encode(uuid),
+      ];
+
+      final encryptedFile = await FileUtil.createFileFromBytes(
+        'legacy.enc',
+        Uint8List.fromList(payloadBytes),
+      );
+
+      final result = await Navec.decryptFile(
+        context: context,
+        filePath: encryptedFile.path,
+        password: password,
+      );
+
+      expect(result, isNotNull);
+      expect(result.length, 2);
+
+      final File decryptedFile = result.first as File;
+      final String decryptedUuid = result.last as String;
+
+      expect(decryptedUuid, uuid);
+      expect(await decryptedFile.readAsBytes(), originalBytes);
+      expect(p.extension(decryptedFile.path), '.${originalExtension.trim()}');
+    }
 
     setUp(() async {
       final tempDir = await Directory.systemTemp.createTemp('navec_test_');
@@ -60,51 +109,30 @@ void main() {
       ));
 
       await tester.runAsync(() async {
-        final aes = Aes(keyLengthInBytes: 16);
-        String legacyKeyText = password.trim();
-        while (legacyKeyText.length < aes.keyLengthInBytes) {
-          legacyKeyText = '$legacyKeyText${Navec.passwordPadChar}';
-        }
-        final legacyKey = enc.Key.fromUtf8(legacyKeyText);
-        final legacyIv = enc.IV.fromLength(Aes.ivLength);
-        final legacyEncrypter = enc.Encrypter(enc.AES(legacyKey));
-        final legacyEncrypted = legacyEncrypter.encryptBytes(
-          originalBytes,
-          iv: legacyIv,
-        );
-
-        final extensionField = originalExtension
-            .padRight(Navec.headerFileExtensionFieldLength);
-        final algoField = 'AES128'.padRight(Navec.headerAlgorithmFieldLength);
-
-        final payloadBytes = <int>[
-          ...utf8.encode(Navec.headerFileSignature),
-          ...utf8.encode(extensionField),
-          ...utf8.encode(algoField),
-          ...legacyEncrypted.bytes,
-          ...utf8.encode(uuid),
-        ];
-
-        final encryptedFile = await FileUtil.createFileFromBytes(
-          'legacy.enc',
-          Uint8List.fromList(payloadBytes),
-        );
-
-        final result = await Navec.decryptFile(
+        await _expectLegacyDecryption(
           context: capturedContext,
-          filePath: encryptedFile.path,
-          password: password,
+          originalExtension: '2data',
         );
+      });
+    });
 
-        expect(result, isNotNull);
-        expect(result.length, 2);
+    testWidgets('decrypts legacy layout when extension resembles version',
+        (tester) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(MaterialApp(
+        home: Builder(
+          builder: (context) {
+            capturedContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      ));
 
-        final File decryptedFile = result.first as File;
-        final String decryptedUuid = result.last as String;
-
-        expect(decryptedUuid, uuid);
-        expect(await decryptedFile.readAsBytes(), originalBytes);
-        expect(p.extension(decryptedFile.path), '.${originalExtension.trim()}');
+      await tester.runAsync(() async {
+        await _expectLegacyDecryption(
+          context: capturedContext,
+          originalExtension: '2024',
+        );
       });
     });
   });
