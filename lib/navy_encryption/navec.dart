@@ -21,6 +21,7 @@ class Navec {
   static const passwordPadChar = '.';
   static const notEncryptCode = '';
   static const headerUUIDFieldLength = 36;
+  static const headerVersion = '2';
 
   static final algorithms = <BaseAlgorithm>[
     // Test(),
@@ -107,7 +108,20 @@ class Navec {
     const space = ' ';
 
     var bytes = await File(filePath).readAsBytes();
-    var encryptedBytes = algo.encrypt(password, bytes);
+    final encryptedBytes = algo.encrypt(password, bytes);
+    Uint8List ivBytes;
+    Uint8List cipherBytes = encryptedBytes;
+    final bool includeVersion = algo is Aes;
+
+    if (includeVersion) {
+      if (encryptedBytes.length < Aes.ivLength) {
+        throw StateError('Encrypted payload is shorter than the IV length.');
+      }
+      ivBytes = Uint8List.fromList(
+          encryptedBytes.sublist(0, Aes.ivLength));
+      cipherBytes = Uint8List.fromList(
+          encryptedBytes.sublist(Aes.ivLength));
+    }
 
     var logMap = <String, dynamic>{
       'Operation': 'Encryption',
@@ -129,13 +143,27 @@ class Navec {
       algoCode = '$algoCode$space';
     }
 
-    List<int> encryptedBytesWithHeader = [
-      ...utf8.encode(Navec.headerFileSignature), // header
-      ...utf8.encode(fileExtension), // old extension, padding with space(s)
-      ...utf8.encode(algoCode), // algo code, padding with space(s)
-      ...encryptedBytes, // encrypted bytes
-      ...utf8.encode(uuid),
+    final headerBytes = <int>[
+      ...utf8.encode(Navec.headerFileSignature),
     ];
+
+    if (includeVersion) {
+      headerBytes.addAll(utf8.encode(Navec.headerVersion));
+      logMap['Header version'] = Navec.headerVersion;
+    }
+
+    headerBytes
+      ..addAll(utf8.encode(fileExtension))
+      ..addAll(utf8.encode(algoCode));
+
+    if (ivBytes != null) {
+      headerBytes.addAll(ivBytes);
+      logMap['IV (base64)'] = base64Encode(ivBytes);
+    }
+
+    headerBytes
+      ..addAll(cipherBytes)
+      ..addAll(utf8.encode(uuid));
 
     var outFilename =
         '${p.basenameWithoutExtension(filePath)}.${Navec.encryptedFileExtension}';
@@ -143,7 +171,7 @@ class Navec {
 
     File outFile = await FileUtil.createFileFromBytes(
       outFilename,
-      Uint8List.fromList(encryptedBytesWithHeader),
+      Uint8List.fromList(headerBytes),
     );
     logMap['Encrypted file path'] = outFile.path;
 
@@ -270,7 +298,19 @@ class Navec {
   }) async {
     var fileBytes = await File(filePath).readAsBytes();
 
-    var extensionFieldBeginIndex = Navec.headerFileSignature.length;
+    final signatureLength = Navec.headerFileSignature.length;
+    bool hasVersion = false;
+    if (fileBytes.length >=
+        signatureLength + Navec.headerVersion.length) {
+      final versionCandidate = utf8.decode(fileBytes.sublist(
+        signatureLength,
+        signatureLength + Navec.headerVersion.length,
+      ));
+      hasVersion = versionCandidate == Navec.headerVersion;
+    }
+    final versionLength = hasVersion ? Navec.headerVersion.length : 0;
+
+    var extensionFieldBeginIndex = signatureLength + versionLength;
     var algorithmFieldBeginIndex =
         extensionFieldBeginIndex + Navec.headerFileExtensionFieldLength;
     var contentBeginIndex =
@@ -315,6 +355,8 @@ class Navec {
       contentEndIndex = contentEndIndex - headerUUIDFieldLength;
     } catch (err) {}
 
+    logMap['Header version'] = hasVersion ? Navec.headerVersion : '1';
+
     logWithBorder(logMap, 2);
 
     var algo = Navec.algorithms.firstWhere(
@@ -331,8 +373,30 @@ class Navec {
       return null;
     }
 
-    final encryptedContent = fileBytes.sublist(contentBeginIndex, contentEndIndex);
-    final decryptedBytes = algo.decrypt(password, encryptedContent);
+    Uint8List ivBytes;
+    if (hasVersion && algo is Aes) {
+      final ivEndIndex = contentBeginIndex + Aes.ivLength;
+      if (ivEndIndex <= contentEndIndex) {
+        ivBytes = Uint8List.fromList(
+            fileBytes.sublist(contentBeginIndex, ivEndIndex));
+        contentBeginIndex = ivEndIndex;
+      }
+    }
+
+    final encryptedSlice =
+        fileBytes.sublist(contentBeginIndex, contentEndIndex);
+    Uint8List decryptedBytes = algo.decrypt(
+      password,
+      Uint8List.fromList(encryptedSlice),
+      iv: ivBytes,
+    );
+
+    if (decryptedBytes == null && algo is Aes && (ivBytes == null || ivBytes.isEmpty)) {
+      decryptedBytes = algo.decrypt(
+        password,
+        Uint8List.fromList(encryptedSlice),
+      );
+    }
 
     if (decryptedBytes == null) {
       showOkDialog(

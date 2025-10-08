@@ -14,7 +14,7 @@ class Test extends BaseAlgorithm {
   }
 
   @override
-  Uint8List decrypt(String password, Uint8List bytes) {
+  Uint8List decrypt(String password, Uint8List bytes, {Uint8List iv}) {
     var list = List<int>.from(bytes);
     return Uint8List.fromList(list.map((byte) {
       return byte == 0 ? 255 : byte - 1;

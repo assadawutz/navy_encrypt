@@ -5,7 +5,7 @@ import 'package:navy_encrypt/navy_encryption/algorithms/base_algorithm.dart';
 import 'package:navy_encrypt/navy_encryption/navec.dart';
 
 class Aes extends BaseAlgorithm {
-  final iv = enc.IV.fromLength(16);
+  static const int ivLength = 16;
 
   Aes({int keyLengthInBytes})
       : super(
@@ -15,19 +15,29 @@ class Aes extends BaseAlgorithm {
 
   @override
   Uint8List encrypt(String password, Uint8List bytes) {
-    var encrypted = _createEncrypter(password).encryptBytes(bytes, iv: iv);
-    return encrypted.bytes;
+    final iv = enc.IV.fromSecureRandom(ivLength);
+    final encrypted =
+        _createEncrypter(password).encryptBytes(bytes, iv: iv).bytes;
+    return Uint8List.fromList([...iv.bytes, ...encrypted]);
   }
 
   @override
-  Uint8List decrypt(String password, Uint8List bytes) {
-    var decrypted;
+  Uint8List decrypt(String password, Uint8List bytes, {Uint8List iv}) {
+    if (iv != null && iv.length != ivLength) {
+      print('Invalid IV length for AES decryption.');
+      return null;
+    }
+
+    List<int> decrypted;
     try {
-      decrypted =
-          _createEncrypter(password).decryptBytes(enc.Encrypted(bytes), iv: iv);
+      final usedIv = iv == null
+          ? enc.IV.fromLength(ivLength)
+          : enc.IV(iv);
+      decrypted = _createEncrypter(password)
+          .decryptBytes(enc.Encrypted(bytes), iv: usedIv);
     } catch (e) {
       print(e);
-    } finally {}
+    }
     return decrypted == null ? null : Uint8List.fromList(decrypted);
   }
 
