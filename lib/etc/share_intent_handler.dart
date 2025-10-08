@@ -192,24 +192,40 @@ class ShareIntentHandler {
       }
     }
 
-    if (resolvedPath == null || resolvedPath.trim().isEmpty) {
+    final originalFile = File(filePath);
+    if (!await originalFile.exists()) {
       logOneLineWithBorderSingle(
-          'Resolved file path from shared text is empty: $resolvedPath');
+          'Shared file could not be found at resolved path: $filePath');
       return null;
     }
 
-    final normalizedPath = p.normalize(resolvedPath.trim());
-    final file = File(normalizedPath);
-    if (!await file.exists()) {
-      logOneLineWithBorderSingle(
-          'Resolved shared file does not exist on disk: $normalizedPath');
-      return null;
-    }
+    final extensionWithDot = p.extension(filePath);
+    final hasExtension = extensionWithDot.isNotEmpty;
+    final extension = hasExtension
+        ? extensionWithDot.replaceFirst('.', '').toLowerCase()
+        : '';
 
-    final extension = p.extension(normalizedPath);
-    if (extension.isEmpty) {
-      logOneLineWithBorderSingle(
-          'Shared file has no extension; continuing with original path.');
+    // If extension is not 'enc', create a copied file with '.enc' extension
+    // instead of renaming the original file.
+    if (extension != 'enc') {
+      final directory = originalFile.parent.path;
+      final baseName = hasExtension
+          ? p.basenameWithoutExtension(filePath)
+          : p.basename(filePath);
+      final encFilePath = p.join(directory, '$baseName.enc');
+
+      try {
+        final encFile = await originalFile.copy(encFilePath);
+        filePath = encFile.path;
+      } on FileSystemException catch (error) {
+        logOneLineWithBorderSingle(
+            'Failed to create .enc copy for shared file: ${error.message}');
+        return null;
+      } catch (error) {
+        logOneLineWithBorderSingle(
+            'Unexpected error while creating .enc copy: $error');
+        return null;
+      }
     }
 
     return normalizedPath;
