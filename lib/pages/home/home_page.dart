@@ -858,8 +858,10 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
-  Future<PackageInfo> get packageInfoFuture {
-    return _packageInfoFuture ??= PackageInfo.fromPlatform();
+  Future<PackageInfo> _getPackageInfo() async {
+    return await PackageInfo.fromPlatform();
+
+    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
@@ -880,6 +882,26 @@ class HomePageController extends MyState<HomePage> {
 
     return 'เวอร์ชัน $version+$buildNumber';
   }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
 }
 
 typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);

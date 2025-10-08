@@ -185,15 +185,20 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
 
     isLoading = false;
 
+    final processedFilePath = outFile.path;
+    final isEncryptedFile = p.extension(processedFilePath).toLowerCase() ==
+        '.${Navec.encryptedFileExtension}';
+
     Navigator.pushReplacementNamed(
       context,
       ResultPage.routeName,
       arguments: {
-        'filePath': outFile.path,
+        'filePath': processedFilePath,
+        'processedFilePath': processedFilePath,
         'message': 'ถอดรหัสสำเร็จ',
-        'isEncryption': false,
+        'isEncryptedFile': isEncryptedFile,
         'userID': getLog,
-        'fileEncryptPath': _toBeDecryptedFilePath,
+        'originalInputPath': _toBeDecryptedFilePath,
         'signatureCode': null,
         'type': 'encryption'
       },
