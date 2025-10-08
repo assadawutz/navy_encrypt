@@ -322,18 +322,31 @@ class Navec {
       orElse: () => null,
     );
 
-    File outFile;
-    fileBytes = await File(filePath).readAsBytes();
+    if (algo == null) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไฟล์ถูกเข้ารหัสด้วย Algorithm ที่แอปนี้ไม่รองรับ',
+      );
+      return null;
+    }
 
-    var decryptedBytes = algo.decrypt(
-        password, fileBytes.sublist(contentBeginIndex, contentEndIndex));
-    //
-    //
-    //
+    final encryptedContent = fileBytes.sublist(contentBeginIndex, contentEndIndex);
+    final decryptedBytes = algo.decrypt(password, encryptedContent);
+
+    if (decryptedBytes == null) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'รหัสผ่านไม่ถูกต้อง หรือเกิดข้อผิดพลาดในการถอดรหัส',
+      );
+      return null;
+    }
+
     var outFilename = '${p.basenameWithoutExtension(filePath)}.$fileExtension';
     logMap['Decrypted file name'] = outFilename;
 
-    outFile = await FileUtil.createFileFromBytes(
+    var outFile = await FileUtil.createFileFromBytes(
       outFilename,
       Uint8List.fromList(decryptedBytes),
     );
