@@ -119,7 +119,7 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
                 ),
                 //if (width > 900 || height > 840)
                 FutureBuilder(
-                  future: state._getPackageInfo(),
+                  future: state.packageInfoFuture,
                   builder: (BuildContext context,
                       AsyncSnapshot<PackageInfo> snapshot) {
                     if (snapshot.hasData) {

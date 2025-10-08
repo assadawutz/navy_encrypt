@@ -53,6 +53,7 @@ class HomePageController extends MyState<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List<_HomeMenuAction> _menuActions;
   String filePath;
+  Future<PackageInfo> _packageInfoFuture;
 
   HomePageController(this.filePath);
 
@@ -297,15 +298,24 @@ class HomePageController extends MyState<HomePage> {
     }
   }
 
-  _openSystemPicker2(BuildContext context) async {
-    File _file;
+  Future<void> _openSystemPicker2(BuildContext context) async {
+    final FilePickerResult result = await FilePicker.platform.pickFiles();
+    if (result == null || result.files.isEmpty) {
+      return;
+    }
 
-    FilePickerResult result = await FilePicker.platform.pickFiles();
+    final String selectedPath = result.files.single.path;
+    if (selectedPath == null || selectedPath.trim().isEmpty) {
+      return;
+    }
 
-    final file = File(result.files.single.path);
-    _file = file;
+    final File selectedFile = File(selectedPath);
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
-      // print("fieleee ${_file.path}");
+      // print("fieleee ${selectedFile.path}");
     });
   }
 
@@ -531,39 +541,61 @@ class HomePageController extends MyState<HomePage> {
     );
   }
 
-  _doPickFromGoogleDrive(BuildContext context) async {
+  Future<void> _doPickFromGoogleDrive(BuildContext context) async {
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน Google Drive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var googleDrive = GoogleDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await googleDrive.signInWithOAuth2()
-        : await googleDrive.signIn();
+    final googleDrive = GoogleDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await googleDrive.signInWithOAuth2()
+          : await googleDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
             cloudDrive: googleDrive,
             title: 'Google Drive',
             headerImagePath: 'assets/images/ic_google_drive.png',
-            rootName: 'Drive'),
-      );
-    } else {
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register Google Drive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน Google Drive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
   }
 
-  _pickFromOneDrive(BuildContext context) async {
+  Future<void> _pickFromOneDrive(BuildContext context) async {
     /*if (Platform.isWindows || Platform.isMacOS) {
       var oneDrive = OneDrive(CloudPickerMode.file);
       var signInSuccess = await oneDrive.signInWithOAuth2();
@@ -573,36 +605,57 @@ class HomePageController extends MyState<HomePage> {
       return;
     }*/
 
+    if (!mounted) {
+      return;
+    }
+
     isLoading = true;
     loadingMessage = 'กำลังลงทะเบียนเข้าใช้งาน OneDrive';
-    Future.delayed(Duration(seconds: 2), () {
-      isLoading = false;
-    });
 
-    var oneDrive = OneDrive(CloudPickerMode.file);
-    var signInSuccess = Platform.isWindows || Platform.isMacOS
-        ? await oneDrive.signInWithOAuth2()
-        : await oneDrive.signIn();
+    final oneDrive = OneDrive(CloudPickerMode.file);
+    try {
+      final signInSuccess = Platform.isWindows || Platform.isMacOS
+          ? await oneDrive.signInWithOAuth2()
+          : await oneDrive.signIn();
 
-    if (signInSuccess) {
-      Navigator.pushNamed(
-        context,
-        CloudPickerPage.routeName,
-        arguments: CloudPickerPageArg(
-          cloudDrive: oneDrive,
-          title: 'OneDrive',
-          headerImagePath: 'assets/images/ic_onedrive_new.png',
-          rootName: 'Drive',
-        ),
-      );
-    } else {
+      if (!mounted) {
+        return;
+      }
+
+      if (signInSuccess == true) {
+        Navigator.pushNamed(
+          context,
+          CloudPickerPage.routeName,
+          arguments: CloudPickerPageArg(
+            cloudDrive: oneDrive,
+            title: 'OneDrive',
+            headerImagePath: 'assets/images/ic_onedrive_new.png',
+            rootName: 'Drive',
+          ),
+        );
+      } else {
+        showOkDialog(
+          context,
+          'ผิดพลาด',
+          textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
+        );
+      }
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to register OneDrive session: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
       showOkDialog(
         context,
         'ผิดพลาด',
         textContent: 'ไม่สามารถลงทะเบียนเข้าใช้งาน OneDrive ได้',
       );
+    } finally {
+      if (mounted) {
+        isLoading = false;
+      }
     }
-    //isLoading = false;
 
     /*final success = await onedrive.connect();
 
@@ -808,10 +861,7 @@ class HomePageController extends MyState<HomePage> {
   Future<PackageInfo> _getPackageInfo() async {
     return await PackageInfo.fromPlatform();
 
-    /*String appName = packageInfo.appName;
-    String packageName = packageInfo.packageName;
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;*/
+    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
@@ -832,6 +882,26 @@ class HomePageController extends MyState<HomePage> {
 
     return 'เวอร์ชัน $version+$buildNumber';
   }
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
 }
 
 typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);

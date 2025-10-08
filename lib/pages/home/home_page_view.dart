@@ -74,7 +74,7 @@ class _HomePageView extends WidgetView<HomePage, HomePageController> {
             ),
           SizedBox(height: 20), // เผื่อ space ด้านล่าง
           FutureBuilder(
-            future: state._getPackageInfo(),
+            future: state.packageInfoFuture,
             builder:
                 (BuildContext context, AsyncSnapshot<PackageInfo> snapshot) {
               if (snapshot.hasData) {
