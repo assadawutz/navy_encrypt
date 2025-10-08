@@ -155,18 +155,41 @@ class ShareIntentHandler {
   }
 
   Future<String> _getFilePathFromUrl(String url) async {
-    if (url.trim().isEmpty) return null;
-
-    /*var file = await _convertUriToFile(url);
-    if (file == null) return null;*/
-
-    String filePath;
-    try {
-      filePath = await FlutterAbsolutePath.getAbsolutePath(url);
-    } catch (error) {
-      logOneLineWithBorderSingle(
-          'getAbsolutePath error while resolving shared text: $error');
+    final trimmedUrl = url?.trim();
+    if (trimmedUrl == null || trimmedUrl.isEmpty) {
+      logOneLineWithBorderSingle('Shared text URL is empty.');
       return null;
+    }
+
+    final uri = Uri.tryParse(trimmedUrl);
+    if (uri == null) {
+      logOneLineWithBorderSingle('Unable to parse shared text URL: $trimmedUrl');
+      return null;
+    }
+
+    String resolvedPath;
+    if (!uri.hasScheme || uri.scheme.isEmpty) {
+      resolvedPath = trimmedUrl;
+    } else if (uri.scheme == 'file') {
+      try {
+        resolvedPath = File.fromUri(uri).path;
+      } catch (error) {
+        logOneLineWithBorderSingle(
+            'Unable to convert file URI to path ($trimmedUrl): $error');
+        return null;
+      }
+    } else if (uri.scheme == 'http' || uri.scheme == 'https') {
+      logOneLineWithBorderSingle(
+          'Shared text URL points to a network resource which is not supported: $trimmedUrl');
+      return null;
+    } else {
+      try {
+        resolvedPath = await FlutterAbsolutePath.getAbsolutePath(trimmedUrl);
+      } catch (error) {
+        logOneLineWithBorderSingle(
+            'getAbsolutePath error while resolving shared text: $error');
+        return null;
+      }
     }
 
     final originalFile = File(filePath);
@@ -205,7 +228,7 @@ class ShareIntentHandler {
       }
     }
 
-    return filePath;
+    return normalizedPath;
   }
 
 /*Future<File> _convertUriToFile(String url) async {
