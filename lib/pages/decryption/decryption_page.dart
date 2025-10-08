@@ -105,16 +105,23 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
         filePath: _toBeDecryptedFilePath,
         password: password,
       );
-      print("decrypt = ${decryptData[0]}");
-      print("decrypt = ${decryptData[1]}");
-      // var uuid = Uuid();
+
+      if (decryptData == null) {
+        isLoading = false;
+        return;
+      }
 
       outFile = decryptData[0];
       uuid = decryptData[1];
-      // var uid = Uuid();
-      // uuid = uid.v4();
+
+      if (outFile == null) {
+        isLoading = false;
+        return;
+      }
     } on Exception catch (e) {
+      isLoading = false;
       showOkDialog(context, 'เกิดข้อผิดพลาดในการถอดรหัส: $e');
+      return;
     }
     String getLog;
 
