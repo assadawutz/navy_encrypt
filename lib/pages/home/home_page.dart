@@ -33,6 +33,7 @@ import 'package:navy_encrypt/pages/settings/settings_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 part 'home_page_view.dart';
 part 'home_page_view_win.dart';
@@ -77,6 +78,7 @@ class HomePageController extends MyState<HomePage> {
   void initState() {
     super.initState();
     _initMenuData();
+    _initQuickActions();
     // Future.delayed(
     //     Duration.zero, () => print('SCREEN RATIO: ${screenRatio(context)}'));
 
@@ -319,26 +321,47 @@ class HomePageController extends MyState<HomePage> {
     });
   }
 
-  _openSystemPicker(BuildContext context,
-      {bool pickImage = false, bool pickVideo = false}) async {
+  Future<void> _openSystemPicker(
+    BuildContext context, {
+    bool pickImage = false,
+    bool pickVideo = false,
+  }) async {
+    final selectedFilePath = await _pickFileFromSystem(
+      context,
+      pickImage: pickImage,
+      pickVideo: pickVideo,
+      keepLoadingOnSuccess: true,
+      loadingText: 'กำลังแสดงไดอะล็อกสำหรับเลือกไฟล์',
+    );
+
+    if (selectedFilePath == null) {
+      return;
+    }
+
+    await _processPickedFile(selectedFilePath);
+  }
+
+  Future<String> _pickFileFromSystem(
+    BuildContext context, {
+    bool pickImage = false,
+    bool pickVideo = false,
+    bool keepLoadingOnSuccess = false,
+    String loadingText,
+  }) async {
     if (Platform.isAndroid == true) {
       await _getStoragePermission();
-      // final permission1 = Permission.storage;
-      final permission2 = Permission.photos;
-      final permission3 = Permission.audio;
-      final permission4 = Permission.camera;
-      // if (await permission1.isDenied) {
-      //   print("---photos permission---");
-      //   await permission1.request();
-      // }
-      if (await permission2.isDenied) {
-        await permission2.request();
+      final permissionPhotos = Permission.photos;
+      final permissionAudio = Permission.audio;
+      final permissionCamera = Permission.camera;
+
+      if (await permissionPhotos.isDenied) {
+        await permissionPhotos.request();
       }
-      if (await permission3.isDenied) {
-        await permission3.request();
+      if (await permissionAudio.isDenied) {
+        await permissionAudio.request();
       }
-      if (await permission4.isDenied) {
-        await permission4.request();
+      if (await permissionCamera.isDenied) {
+        await permissionCamera.request();
       }
     }
 
@@ -346,7 +369,7 @@ class HomePageController extends MyState<HomePage> {
 
     try {
       isLoading = true;
-      loadingMessage = 'กำลังแสดงไดอะล็อกสำหรับเลือกไฟล์';
+      loadingMessage = loadingText ?? 'กำลังเลือกไฟล์';
 
       if (pickImage) {
         pickedFile = await FilePickerCross.importFromStorage(
@@ -370,12 +393,12 @@ class HomePageController extends MyState<HomePage> {
       }
     } on FileSelectionCanceledError {
       _stopLoading();
-      return;
+      return null;
     } catch (error, stackTrace) {
       logOneLineWithBorderDouble(
           'System picker failed: $error\n$stackTrace');
       if (!mounted) {
-        return;
+        return null;
       }
       _stopLoading();
       showOkDialog(
@@ -383,16 +406,16 @@ class HomePageController extends MyState<HomePage> {
         'ผิดพลาด',
         textContent: 'ไม่สามารถเลือกไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
       );
-      return;
+      return null;
     }
 
     if (!mounted) {
-      return;
+      return null;
     }
 
     if (pickedFile == null) {
       _stopLoading();
-      return;
+      return null;
     }
 
     final pickedFilePath = pickedFile.path?.trim();
@@ -403,10 +426,14 @@ class HomePageController extends MyState<HomePage> {
         'ผิดพลาด',
         textContent: 'ไม่สามารถอ่านไฟล์ที่เลือกได้',
       );
-      return;
+      return null;
     }
 
-    await _processPickedFile(pickedFilePath);
+    if (!keepLoadingOnSuccess) {
+      _stopLoading();
+    }
+
+    return pickedFilePath;
   }
 
   _pickFromCamera(BuildContext context) async {
@@ -767,6 +794,7 @@ class HomePageController extends MyState<HomePage> {
   }
 
   Future<void> _processPickedFile(String filePath) async {
+    loadingMessage = 'กำลังตรวจสอบไฟล์';
     final normalizedPath = filePath?.trim();
     if (normalizedPath == null || normalizedPath.isEmpty) {
       _stopLoading();
@@ -837,12 +865,39 @@ class HomePageController extends MyState<HomePage> {
     );
   }
 
+  Future<void> _shareLocalFile(BuildContext context) async {
+    final selectedFilePath = await _pickFileFromSystem(
+      context,
+      loadingText: 'กำลังเลือกไฟล์เพื่อแชร์',
+    );
+
+    if (selectedFilePath == null) {
+      return;
+    }
+
+    try {
+      await Share.shareFiles(<String>[selectedFilePath]);
+    } catch (error, stackTrace) {
+      logOneLineWithBorderDouble(
+          'Failed to open share sheet: $error\n$stackTrace');
+      if (!mounted) {
+        return;
+      }
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'ไม่สามารถแชร์ไฟล์ได้ กรุณาลองใหม่อีกครั้ง',
+      );
+    }
+  }
+
   void _stopLoading() {
     if (!mounted) {
       return;
     }
 
     isLoading = false;
+    loadingMessage = '';
   }
 
   String _resolveRouteForFile(String filePath) {
@@ -922,4 +977,42 @@ class _HomeMenuAction {
   bool get isVisible => _isVisiblePredicate?.call() ?? true;
 
   String get label => labelBuilder();
+}
+
+typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
+
+class _HomeMenuAction {
+  const _HomeMenuAction({
+    @required this.assetPath,
+    @required this.labelBuilder,
+    @required this.onTap,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final String assetPath;
+  final String Function() labelBuilder;
+  final _MenuActionHandler onTap;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
+
+  String get label => labelBuilder();
+}
+
+class _HomeQuickAction {
+  const _HomeQuickAction({
+    @required this.icon,
+    @required this.label,
+    @required this.onTap,
+    this.tooltip,
+    bool Function() isVisible,
+  }) : _isVisiblePredicate = isVisible;
+
+  final IconData icon;
+  final String label;
+  final _MenuActionHandler onTap;
+  final String tooltip;
+  final bool Function() _isVisiblePredicate;
+
+  bool get isVisible => _isVisiblePredicate?.call() ?? true;
 }

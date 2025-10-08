@@ -72,6 +72,30 @@ class _HomePageViewWin extends WidgetView<HomePage, HomePageController> {
                     ),
                   ],
                 ),
+                if (quickActions.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: width > 1200 ? width * 0.6 : width,
+                        ),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 16.0,
+                          runSpacing: 12.0,
+                          children: quickActions
+                              .map(
+                                (action) => _QuickActionButton(
+                                  action: action,
+                                ),
+                              )
+                              .toList(growable: false),
+                        ),
+                      ),
+                    ),
+                  ),
                 Expanded(
                   child: width > widthThreshold
                       ? Container(

@@ -179,3 +179,37 @@ class MenuItem extends StatelessWidget {
     );
   }
 }
+
+class _QuickActionButton extends StatelessWidget {
+  const _QuickActionButton({Key key, @required this.action})
+      : super(key: key);
+
+  final _HomeQuickAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+      ),
+      icon: Icon(action.icon, size: 20.0),
+      label: Text(
+        action.label,
+        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+      ),
+      onPressed: () => action.onTap(context),
+    );
+
+    if (action.tooltip?.isNotEmpty == true) {
+      return Tooltip(
+        message: action.tooltip,
+        child: button,
+      );
+    }
+
+    return button;
+  }
+}
