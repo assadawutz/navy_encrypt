@@ -915,8 +915,6 @@ class HomePageController extends MyState<HomePage> {
 
   Future<PackageInfo> _getPackageInfo() async {
     return await PackageInfo.fromPlatform();
-
-    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
