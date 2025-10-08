@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "รับส่งไฟล์"
-#define MyAppVersion "3.0.1+4"
+#define MyAppVersion "3.0.2+6"
 #define MyAppPublisher "กรมการสื่อสารและเทคโนโลยีสารสนเทศทหารเรือ"
 #define MyAppURL "http://www.ncit.navy.mi.th/index.php/main/index"
 #define MyAppExeName "navy_encrypt.exe"

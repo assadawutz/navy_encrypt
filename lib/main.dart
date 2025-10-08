@@ -26,15 +26,6 @@ import 'package:window_size/window_size.dart';
 
 String filePathFromCli = '';
 
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
-}
-
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -44,8 +35,6 @@ Future<void> main(List<String> arguments) async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-
-  HttpOverrides.global = new MyHttpOverrides();
 
   //#region Firebase
 
