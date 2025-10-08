@@ -480,7 +480,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				ENABLE_BITCODE = NO;
@@ -493,7 +493,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -514,7 +514,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "Share Extension/Share Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -528,7 +528,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise.Share-Extension";
@@ -553,7 +553,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "Share Extension/Share Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -567,7 +567,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise.Share-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -589,7 +589,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = "Share Extension/Share Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -603,7 +603,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise.Share-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -736,7 +736,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				ENABLE_BITCODE = NO;
@@ -749,7 +749,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -769,7 +769,7 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+                                CURRENT_PROJECT_VERSION = 6;
 				CUSTOM_GROUP_ID = "group.th.mi.navy.navy-encrypt.ios";
 				DEVELOPMENT_TEAM = BA93FUXZ6S;
 				ENABLE_BITCODE = NO;
@@ -782,7 +782,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.1;
+                                MARKETING_VERSION = 3.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "th.mi.navy.navy-encrypt.ios.enterprise";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
