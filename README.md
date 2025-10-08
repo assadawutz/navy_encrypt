@@ -1,5 +1,23 @@
 # navy_encrypt
-flutter 3.3.8 openjdk@17
+
+This project is pinned to **Flutter 3.3.8** and **OpenJDK 17** via
+[FVM](https://fvm.app/). Using the FVM-managed binaries keeps `flutter` and
+`dart` invocations consistent across macOS, Windows, and Linux environments.
+
+```sh
+# install FVM once (https://fvm.app/docs/getting_started/installation)
+pub global activate fvm
+
+# run Flutter and Dart through FVM for every command
+fvm flutter pub get
+fvm flutter test
+fvm dart run tool/some_script.dart
+```
+
+After `fvm install`, the desired SDK version is cached under `.fvm/flutter_sdk`
+and ignored from version control. Developers can still use the globally
+installed Flutter CLI, but the recommended workflow is to always call `fvm
+flutter …` or `fvm dart …`.
 
 ## Manual QA
 
