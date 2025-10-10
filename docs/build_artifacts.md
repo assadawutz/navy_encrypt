@@ -11,6 +11,32 @@ produce unsigned artifacts for you, jump to [Automated GitHub builds](#automated
 > commands below on a workstation that has the required vendor tooling
 > installed. IPA generation specifically requires macOS with Xcode 14 or newer.
 
+## Command-line helper
+
+For repeatable builds across macOS, Windows, and Linux, the repository ships
+with a Dart CLI wrapper that selects the best available Flutter binary (FVM if
+installed, otherwise the globally installed Flutter SDK) and forwards common
+options such as build name, build number, and `--dart-define` values.
+
+```sh
+dart run tool/build_artifacts.dart --apk --appbundle --ipa --build-name 3.0.4 --build-number 8
+```
+
+When invoked without flags the script builds the default pair of artifacts:
+
+- `app-release.apk`
+- `Runner.ipa` (using the `--export-method ad-hoc` default)
+
+Additional options:
+
+- `--appbundle` adds a Google Play-ready AAB to the build set.
+- `--export-method` switches the IPA export method (e.g. `app-store`).
+- `--flavor` selects a Flutter flavor for all targets.
+- `--ipa-no-codesign` mirrors CI by invoking `flutter build ipa --no-codesign`.
+- `--dart-define key=value` passes through compile-time environment variables.
+
+Run `dart run tool/build_artifacts.dart --help` for the complete usage guide.
+
 ## Prerequisites
 
 1. Install FVM and fetch the pinned Flutter SDK:
