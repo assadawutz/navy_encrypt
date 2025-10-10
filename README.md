@@ -31,6 +31,18 @@ fvm flutter build appbundle --release
 fvm flutter build ipa --release --export-method ad-hoc
 ```
 
+You can also run a single Dart CLI helper that discovers the best available
+Flutter binary (preferring `fvm`) and executes the requested builds:
+
+```sh
+dart run tool/build_artifacts.dart --apk --ipa --build-name 3.0.4 --build-number 8
+```
+
+The script defaults to building both an APK and IPA when no flags are supplied
+and exposes toggles for app bundles, flavors, custom export methods, and
+`--dart-define` values. See `dart run tool/build_artifacts.dart --help` for the
+complete reference.
+
 Building IPAs requires macOS with the Apple toolchain installed; Linux
 containers used for CI cannot generate iOS archives directly.
 
