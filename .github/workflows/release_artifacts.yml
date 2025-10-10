@@ -1,0 +1,55 @@
+name: Build Mobile Artifacts
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK and IPA
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.3.8
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: |
+          flutter pub get
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: |
+          pod install
+
+      - name: Build Android APK (unsigned)
+        run: |
+          flutter build apk --release
+
+      - name: Build iOS IPA (unsigned)
+        env:
+          FLUTTER_BUILD_NAME: ${{ github.run_number }}
+          FLUTTER_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          flutter build ipa --release --no-codesign
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: navy-encrypt-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload iOS IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: navy-encrypt-ipa
+          path: build/ios/ipa/*.ipa
