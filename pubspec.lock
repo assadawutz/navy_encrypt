@@ -190,13 +190,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
-  disk_space:
-    dependency: "direct main"
-    description:
-      name: disk_space
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.1"
   encrypt:
     dependency: "direct main"
     description:

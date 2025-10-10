@@ -16,7 +16,6 @@ ${BUILT_PRODUCTS_DIR}/RecaptchaInterop/RecaptchaInterop.framework
 ${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework
 ${BUILT_PRODUCTS_DIR}/SwiftyGif/SwiftyGif.framework
 ${BUILT_PRODUCTS_DIR}/device_info_plus/device_info_plus.framework
-${BUILT_PRODUCTS_DIR}/disk_space/disk_space.framework
 ${BUILT_PRODUCTS_DIR}/file_picker/file_picker.framework
 ${BUILT_PRODUCTS_DIR}/flutter_absolute_path/flutter_absolute_path.framework
 ${BUILT_PRODUCTS_DIR}/flutter_file_dialog/flutter_file_dialog.framework

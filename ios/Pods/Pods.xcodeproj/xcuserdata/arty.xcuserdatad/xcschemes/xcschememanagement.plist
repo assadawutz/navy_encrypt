@@ -154,11 +154,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>disk_space.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>file_picker.xcscheme</key>
 		<dict>
 			<key>isShown</key>
