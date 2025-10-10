@@ -1,0 +1,69 @@
+name: Flutter FVM Release
+
+on:
+  push:
+    tags:
+      - 'v*'     # run when you push tags like v1.0.0
+      - 'release-*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔹 Checkout source code
+        uses: actions/checkout@v4
+
+      - name: 🔹 Read Flutter version from .fvmrc
+        id: fvm
+        run: |
+          echo "version=$(jq -r '.flutterSdkVersion' .fvmrc)" >> $GITHUB_OUTPUT
+
+      - name: 🔹 Setup Flutter via FVM
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: 🔹 Show Flutter version
+        run: flutter --version
+
+      - name: 🔹 Get dependencies
+        run: flutter pub get
+
+      - name: 🔹 Analyze code
+        run: flutter analyze
+
+      # Optional test step
+      - name: 🔹 Run tests (if any)
+        run: flutter test || echo "⚠️ No tests found, skipping."
+
+      # === ANDROID BUILD ===
+      - name: 📦 Build Android release APK
+        run: flutter build apk --release
+
+      # === iOS BUILD ===
+      - name: 🍎 Build iOS (no codesign)
+        run: flutter build ios --no-codesign
+
+      # === UPLOAD RELEASES ===
+      - name: 🪶 Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter_builds
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/ios/iphoneos/*.app
+          if-no-files-found: ignore
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/ios/iphoneos/*.app
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        

@@ -53,6 +53,7 @@ class HomePageController extends MyState<HomePage> {
 
   final ImagePicker _picker = ImagePicker();
   List<_HomeMenuAction> _menuActions;
+  List<_HomeQuickAction> _quickActions;
   String filePath;
   Future<PackageInfo> _packageInfoFuture;
 
@@ -63,6 +64,15 @@ class HomePageController extends MyState<HomePage> {
       return const <_HomeMenuAction>[];
     }
     return _menuActions
+        .where((action) => action.isVisible)
+        .toList(growable: false);
+  }
+
+  List<_HomeQuickAction> get quickActions {
+    if (_quickActions == null) {
+      return const <_HomeQuickAction>[];
+    }
+    return _quickActions
         .where((action) => action.isVisible)
         .toList(growable: false);
   }
@@ -157,6 +167,44 @@ class HomePageController extends MyState<HomePage> {
         assetPath: 'assets/images/ic_history.png',
         labelBuilder: () => 'ประวัติ',
         onTap: _openHistory,
+      ),
+    ];
+  }
+
+  void _initQuickActions() {
+    final bool isDesktopPlatform = Platform.isWindows || Platform.isMacOS;
+
+    _quickActions = <_HomeQuickAction>[
+      _HomeQuickAction(
+        icon: Icons.lock_outline,
+        label: 'เข้ารหัสไฟล์',
+        tooltip: 'ไปยังหน้าสำหรับเข้ารหัสไฟล์',
+        onTap: (context) {
+          Navigator.pushNamed(
+            context,
+            EncryptionPage.routeName,
+          );
+        },
+        isVisible: () => isDesktopPlatform,
+      ),
+      _HomeQuickAction(
+        icon: Icons.lock_open_outlined,
+        label: 'ถอดรหัสไฟล์',
+        tooltip: 'ไปยังหน้าสำหรับถอดรหัสไฟล์',
+        onTap: (context) {
+          Navigator.pushNamed(
+            context,
+            DecryptionPage.routeName,
+          );
+        },
+        isVisible: () => isDesktopPlatform,
+      ),
+      _HomeQuickAction(
+        icon: Icons.share_outlined,
+        label: 'แชร์ไฟล์ในเครื่อง',
+        tooltip: 'เลือกไฟล์ในเครื่องเพื่อแชร์อย่างรวดเร็ว',
+        onTap: _shareLocalFile,
+        isVisible: () => isDesktopPlatform,
       ),
     ];
   }
@@ -913,10 +961,15 @@ class HomePageController extends MyState<HomePage> {
     return EncryptionPage.routeName;
   }
 
+  Future<PackageInfo> get packageInfoFuture =>
+      _packageInfoFuture ??= _getPackageInfo();
+
+  void refreshPackageInfo() {
+    _packageInfoFuture = null;
+  }
+
   Future<PackageInfo> _getPackageInfo() async {
     return await PackageInfo.fromPlatform();
-
-    return 'เวอร์ชัน $version+$buildNumber';
   }
 
   String buildVersionLabel(PackageInfo packageInfo) {
@@ -959,46 +1012,6 @@ class _HomeMenuAction {
   String get label => labelBuilder();
 }
 
-typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
-
-class _HomeMenuAction {
-  const _HomeMenuAction({
-    @required this.assetPath,
-    @required this.labelBuilder,
-    @required this.onTap,
-    bool Function() isVisible,
-  }) : _isVisiblePredicate = isVisible;
-
-  final String assetPath;
-  final String Function() labelBuilder;
-  final _MenuActionHandler onTap;
-  final bool Function() _isVisiblePredicate;
-
-  bool get isVisible => _isVisiblePredicate?.call() ?? true;
-
-  String get label => labelBuilder();
-}
-
-typedef _MenuActionHandler = FutureOr<void> Function(BuildContext context);
-
-class _HomeMenuAction {
-  const _HomeMenuAction({
-    @required this.assetPath,
-    @required this.labelBuilder,
-    @required this.onTap,
-    bool Function() isVisible,
-  }) : _isVisiblePredicate = isVisible;
-
-  final String assetPath;
-  final String Function() labelBuilder;
-  final _MenuActionHandler onTap;
-  final bool Function() _isVisiblePredicate;
-
-  bool get isVisible => _isVisiblePredicate?.call() ?? true;
-
-  String get label => labelBuilder();
-}
-
 class _HomeQuickAction {
   const _HomeQuickAction({
     @required this.icon,
@@ -1016,3 +1029,4 @@ class _HomeQuickAction {
 
   bool get isVisible => _isVisiblePredicate?.call() ?? true;
 }
+
