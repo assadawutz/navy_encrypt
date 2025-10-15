@@ -66,8 +66,19 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    var filePath = ModalRoute.of(context).settings.arguments as String;
-    _toBeEncryptedFilePath = filePath;
+    final route = ModalRoute.of(context);
+    final dynamic arguments = route == null ? null : route.settings.arguments;
+
+    String filePath;
+    if (arguments is String && arguments.trim().isNotEmpty) {
+      filePath = arguments.trim();
+    } else if (widget.filePath != null && widget.filePath.trim().isNotEmpty) {
+      filePath = widget.filePath.trim();
+    }
+
+    if (filePath != null && filePath.isNotEmpty) {
+      _toBeEncryptedFilePath = filePath;
+    }
 
     print('PATH OF FILE TO BE ENCRYPTED: $_toBeEncryptedFilePath');
 
@@ -94,6 +105,15 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
   }
 
   Future<void> _handleClickGoButton() async {
+    if (!hasSelectedFile) {
+      showOkDialog(
+        context,
+        'ผิดพลาด',
+        textContent: 'กรุณาเลือกไฟล์ที่ต้องการก่อนดำเนินการ',
+      );
+      return;
+    }
+
     if (_watermarkEditingController.text.trim().isEmpty &&
         _algorithm.code == Navec.notEncryptCode) {
       showOkDialog(
@@ -285,8 +305,9 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
   }
 
   bool _canWatermarkThisFileType() {
-    /*var extension =
-        p.extension(_toBeEncryptedFilePath).substring(1).toLowerCase();*/
+    if (!hasSelectedFile || _fileExtension.isEmpty) {
+      return false;
+    }
 
     return Constants.imageFileTypeList
             .where((fileType) => fileType.fileExtension == _fileExtension)
@@ -304,6 +325,20 @@ class _EncryptionPageController extends MyState<EncryptionPage> {
     setState(() {}); // Update watermark status when resume from settings page
   }
 
-  String get _fileExtension =>
-      p.extension(_toBeEncryptedFilePath).substring(1).toLowerCase();
+  bool get hasSelectedFile =>
+      _toBeEncryptedFilePath != null &&
+      _toBeEncryptedFilePath.trim().isNotEmpty;
+
+  String get _fileExtension {
+    if (!hasSelectedFile) {
+      return '';
+    }
+
+    final extension = p.extension(_toBeEncryptedFilePath);
+    if (extension == null || extension.isEmpty) {
+      return '';
+    }
+
+    return extension.substring(1).toLowerCase();
+  }
 }

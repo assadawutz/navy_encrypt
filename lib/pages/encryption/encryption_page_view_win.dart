@@ -48,28 +48,32 @@ class _EncryptionPageViewWin
                       WatermarkRegisterStatus.registered)
                     Column(
                       children: [
-                        FileDetails(filePath: state._toBeEncryptedFilePath),
-                        const SizedBox(height: 20.0),
-                        _buildWatermarkField(),
-                        const SizedBox(height: 20.0),
-                        _buildEncryptionFields(),
-                        const SizedBox(height: 40.0),
-                        MyButton(
-                          label: 'ดำเนินการ',
-                          rightIcon: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
+                        if (state.hasSelectedFile) ...[
+                          FileDetails(
+                              filePath: state._toBeEncryptedFilePath),
+                          const SizedBox(height: 20.0),
+                          _buildWatermarkField(),
+                          const SizedBox(height: 20.0),
+                          _buildEncryptionFields(),
+                          const SizedBox(height: 40.0),
+                          MyButton(
+                            label: 'ดำเนินการ',
+                            rightIcon: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.chevron_right,
+                                color: Colors.black,
+                                size: 18.0,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.chevron_right,
-                              color: Colors.black,
-                              size: 18.0,
-                            ),
+                            width: 180.0,
+                            onClick: state._handleClickGoButton,
                           ),
-                          width: 180.0,
-                          onClick: state._handleClickGoButton,
-                        ),
+                        ] else
+                          _buildMissingFileNotice(),
                       ],
                     )
                 ],
@@ -189,6 +193,23 @@ class _EncryptionPageViewWin
           onClickRightIcon: state._handleClickPasswordEye,
         ),
       ],
+    );
+  }
+
+  Widget _buildMissingFileNotice() {
+    return MyFormField(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      child: Column(
+        children: [
+          Icon(Icons.insert_drive_file_outlined, size: 48.0),
+          SizedBox(height: 12.0),
+          Text(
+            'ยังไม่ได้เลือกไฟล์สำหรับดำเนินการ\nกรุณาเลือกไฟล์จากหน้าแรก',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ],
+      ),
     );
   }
 }
