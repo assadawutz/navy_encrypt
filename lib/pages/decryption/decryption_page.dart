@@ -57,8 +57,19 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    var filePath = ModalRoute.of(context).settings.arguments as String;
-    _toBeDecryptedFilePath = filePath;
+    final route = ModalRoute.of(context);
+    final dynamic arguments = route == null ? null : route.settings.arguments;
+
+    String filePath;
+    if (arguments is String && arguments.trim().isNotEmpty) {
+      filePath = arguments.trim();
+    } else if (widget.filePath != null && widget.filePath.trim().isNotEmpty) {
+      filePath = widget.filePath.trim();
+    }
+
+    if (filePath != null && filePath.isNotEmpty) {
+      _toBeDecryptedFilePath = filePath;
+    }
 
     print('PATH OF FILE TO BE DECRYPTED: $_toBeDecryptedFilePath');
 
@@ -87,6 +98,11 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
   }
 
   Future<void> _handleClickGoButton() async {
+    if (!hasSelectedFile) {
+      showOkDialog(context, 'กรุณาเลือกไฟล์ที่ต้องการถอดรหัสก่อน');
+      return;
+    }
+
     var password = _passwordEditingController.text;
     if (password.trim().isEmpty) {
       showOkDialog(context, 'ต้องกรอกรหัสผ่าน');
@@ -211,4 +227,8 @@ class _DecryptionPageController extends MyState<DecryptionPage> {
       },
     );
   }
+
+  bool get hasSelectedFile =>
+      _toBeDecryptedFilePath != null &&
+      _toBeDecryptedFilePath.trim().isNotEmpty;
 }

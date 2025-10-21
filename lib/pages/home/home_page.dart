@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:is_first_run/is_first_run.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:navy_encrypt/common/header_scaffold.dart';
 import 'package:navy_encrypt/common/my_dialog.dart';
@@ -20,6 +19,7 @@ import 'package:navy_encrypt/etc/constants.dart';
 import 'package:navy_encrypt/etc/dimension_util.dart';
 import 'package:navy_encrypt/etc/file_util.dart';
 import 'package:navy_encrypt/etc/utils.dart';
+import 'package:navy_encrypt/services/first_run_service.dart';
 import 'package:navy_encrypt/flutter_signin_button/flutter_signin_button.dart';
 import 'package:navy_encrypt/navy_encryption/navec.dart';
 import 'package:navy_encrypt/pages/cloud_picker/cloud_picker_page.dart';
@@ -56,6 +56,7 @@ class HomePageController extends MyState<HomePage> {
   List<_HomeQuickAction> _quickActions;
   String filePath;
   Future<PackageInfo> _packageInfoFuture;
+  final FirstRunService _firstRunService = const FirstRunService();
 
   HomePageController(this.filePath);
 
@@ -102,13 +103,15 @@ class HomePageController extends MyState<HomePage> {
   }
 
   void chkFirstRun() async {
-    bool firstRun = await IsFirstRun.isFirstRun();
-    if (firstRun) {
-      Navigator.pushNamed(
-        context,
-        SettingsPage.routeName,
-      );
+    final bool shouldOpenSettings = await _firstRunService.consumeFirstRunFlag();
+    if (!mounted || !shouldOpenSettings) {
+      return;
     }
+
+    Navigator.pushNamed(
+      context,
+      SettingsPage.routeName,
+    );
   }
 
   // called from main.dart
