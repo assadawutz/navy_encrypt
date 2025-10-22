@@ -1,113 +1,34 @@
 name: navy_encrypt
-description: A new Flutter application.
+description: Navy Encrypt cross-platform secure encryption utility.
+publish_to: 'none'
+version: 3.3.8+8
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString wAdvertisinghile build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys
-version: 3.0.3+7
-
-# Flutter Version 3.3.8
 environment:
-  sdk: ">=2.17.0 <3.0.0"
-  flutter: ">=3.3.8"
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  window_size:
-    git:
-      url: https://github.com/google/flutter-desktop-embedding.git
-      path: plugins/window_size
-      ref: fd519be1e8398c6b6c2062c2447bac960a71bc02
-  args: ^2.4.2
-  flutter_absolute_path:
-    git:
-      url: https://github.com/kornperkus/flutter_absolute_path.git
-
-
-
-
-  #  flutter_icons: ^1.1.0
-  flutter_icons_null_safety: ^1.1.0
-  share_plus: ^4.5.3
-  google_fonts: ^2.0.0
-  encrypt: ^5.0.0
-  #  modal_bottom_sheet: ^3.0.0-pre
-  intl: ^0.17.0
-  path_provider: ^2.0.1
-  receive_sharing_intent: ^1.4.5
-  image_picker: ^0.8.3+3
-  #  file_picker: ^5.5.0
-  file_picker: ^4.5.1
-  file_picker_cross: ^4.6.0
-  path: ^1.8.0
-  photo_view: ^0.12.0
-  line_icons: ^2.0.1
-  font_awesome_flutter: ^9.1.0
-  http: ^0.13.3
-  mime: ^1.0.0
-  mime_type: ^1.0.0
-  uuid: ^3.0.4
-  archive: ^3.4.2
-  image: ^3.0.5
-  universal_html: ^2.2.1
-  permission_handler: ^10.4.3
-  open_file: ^3.2.1
-  package_info_plus: ^1.0.1
-  firebase_core: ^2.4.1
-  #  firebase_auth: ^3.1.2
-  googleapis: ^5.0.1
-  google_sign_in: ^5.1.1
-  flutter_breadcrumb: ^1.0.1
-  cached_network_image: ^3.1.0
-  shared_preferences: ^2.0.8
-  #flutter_glow: ^0.2.0
-  flutter_secure_storage: ^4.2.1
-  flutter_web_auth: ^0.3.1
-  device_info_plus: ^2.0.0
-  provider: ^6.0.1
-  page_transition: ^2.0.4
-  url_launcher: ^6.1.7
-  oauth2: ^2.0.0
-  image_gallery_saver: ^1.7.1
-  desktop_window: ^0.4.0
-  flutter_signin_button: ^2.0.0
-  #  macos_window_utils: ^1.0.0
-
-  cupertino_icons: ^1.0.2
-  icloud_storage: ^0.2.1
-  multi_select_flutter: ^4.1.3
-  printing: ^5.9.3
-  flutter_lints: ^2.0.2
-  #  device_info_plus: ^4.0.0
-  platform: ^3.1.1
-  modal_bottom_sheet: ^2.1.2
-  firebase_auth: ^4.2.5
+  cupertino_icons: ^1.0.8
+  encrypt: ^5.0.3
+  go_router: ^14.1.4
+  google_fonts: ^6.2.1
+  intl: ^0.19.0
+  pointycastle: ^3.7.3
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^4.0.0
 
 flutter:
-
   uses-material-design: true
-
   assets:
     - assets/images/
     - assets/images/win/
     - assets/images/logos/
-
   fonts:
     - family: DBHeavent
       fonts:
