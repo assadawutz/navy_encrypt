@@ -27,33 +27,76 @@ class MyOAuth {
         tokenEndpoint = Uri.parse(tokenEndpoint);
 
   Future<oauth2.Client> connect() async {
-    var credentialsJson = await MyPrefs.getOAuthCredentials(serviceName);
-    var credentials = oauth2.Credentials.fromJson(credentialsJson);
-    if (credentials.isExpired) {
-      try {
-        credentials = await credentials.refresh();
-        await MyPrefs.setOAuthCredentials(serviceName, credentials.toJson());
-      } catch (e) {
-        print(e);
-        credentials = null;
-      }
+    final cachedClient = await _tryRestoreCachedCredentials();
+    if (cachedClient != null) {
+      return cachedClient;
     }
-    return oauth2.Client(credentials);
 
-    try {
-      await _redirectServer.close();
-      // Bind to an ephemeral port on localhost
-      _redirectServer = await HttpServer.bind('localhost', 0);
-      var authenticatedHttpClient = await _getOAuth2Client(
-        Uri.parse('http://localhost:${_redirectServer.port}'),
-      );
-      var credentialsJson = authenticatedHttpClient.credentials.toJson();
-      await MyPrefs.setOAuthCredentials(serviceName, credentialsJson);
-      return authenticatedHttpClient;
-    } catch (e) {
-      print(e);
+    return _authorizeWithBrowser();
+  }
+
+  Future<oauth2.Client> _tryRestoreCachedCredentials() async {
+    final credentialsJson = await MyPrefs.getOAuthCredentials(serviceName);
+    if (credentialsJson == null || credentialsJson.isEmpty) {
       return null;
     }
+
+    try {
+      final credentials = oauth2.Credentials.fromJson(credentialsJson);
+      final client = _buildClient(credentials);
+
+      if (client.credentials.isExpired) {
+        if (!client.credentials.canRefresh) {
+          client.close();
+          return null;
+        }
+
+        try {
+          await client.refreshCredentials();
+          await MyPrefs.setOAuthCredentials(
+            serviceName,
+            client.credentials.toJson(),
+          );
+        } catch (error) {
+          client.close();
+          return null;
+        }
+      }
+
+      return client;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  Future<oauth2.Client> _authorizeWithBrowser() async {
+    try {
+      await _redirectServer?.close();
+      _redirectServer = await HttpServer.bind('localhost', 0);
+
+      final authenticatedHttpClient = await _getOAuth2Client(
+        Uri.parse('http://localhost:${_redirectServer.port}'),
+      );
+
+      await MyPrefs.setOAuthCredentials(
+        serviceName,
+        authenticatedHttpClient.credentials.toJson(),
+      );
+
+      return authenticatedHttpClient;
+    } finally {
+      await _redirectServer?.close();
+      _redirectServer = null;
+    }
+  }
+
+  oauth2.Client _buildClient(oauth2.Credentials credentials) {
+    return oauth2.Client(
+      credentials,
+      identifier: clientId,
+      secret: clientSecret,
+      httpClient: _JsonAcceptingHttpClient(),
+    );
   }
 
   Future<oauth2.Client> _getOAuth2Client(Uri redirectUrl) async {
